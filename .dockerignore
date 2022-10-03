@@ -1,0 +1,7 @@
+# Project specific
+**/__pycache__
+db/
+.git/
+.github/
+.idea/
+.vscode/

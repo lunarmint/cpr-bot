@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "cpr"
+version = "1.0.0"
+description = "A calibrated peer review Discord bot."
+license = "MIT License"
+authors = ["Mint <developer@chocomint.dev>"]
+maintainers = ["Mint <developer@chocomint.dev>"]
+readme = "README.md"
+repository = "https://github.com/lunarmint/cpr-bot"
+
+[tool.poetry.dependencies]
+asyncpraw = "7.5.0"
+coloredlogs = "15.0.1"
+dataset = "1.5.2"
+"discord.py" = "2.0.1"
+pymongo = "4.2.0"
+parsedatetime = "2.6"
+pyaml_env = "1.1.5"
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+black = ">=22.8.0"
+flake8 = ">=5.0.4"
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

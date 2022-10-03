@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  cpr:
+    container_name: cpr
+    image: ghcr.io/lunarmint/cpr-bot:latest
+    restart: unless-stopped
+    volumes:
+        - ./config.yml:/app/config.yml
+        - ./logs:/app/logs/
+    depends_on:
+        - postgresql
+  mongo:
+    image: mongo:6.0.2
+    container_name: mongo
+    command: mongod --port ${MONGO_PORT}
+    restart: unless-stopped
+    volumes:
+        - ./db:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "127.0.0.1:${MONGO_PORT}:${MONGO_PORT}"
