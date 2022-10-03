@@ -2,7 +2,7 @@ version: "3.8"
 services:
   cpr:
     container_name: cpr
-    image: ghcr.io/lunarmint/cpr-bot:latest
+    image: ghcr.io/lunarmint/cpr:latest
     restart: unless-stopped
     volumes:
         - ./config.yml:/app/config.yml
