@@ -3,10 +3,10 @@
 set -e
 
 printf "[1] Stopping cpr and mongo...\n"
-docker stop cpr mongo
+docker stop cpr mongo || true
 
 printf "\n[2] Removing cpr and mongo...\n"
-docker rm cpr mongo
+docker rm cpr mongo || true
 
 printf "\n[3] Pruning any dangling Docker images and volumes...\n"
 docker image prune -f
