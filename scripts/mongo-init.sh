@@ -2,7 +2,7 @@
 
 # Initialize mongodb user auth credentials.
 
-docker exec -it cpr-mongo bash -c 'mongosh --port "$MONGO_PORT" -- "$MONGO_INITDB_DATABASE" <<EOF
+docker exec -it mongo bash -c 'mongosh --port "$MONGO_PORT" -- "$MONGO_INITDB_DATABASE" <<EOF
     var rootUser = "$MONGO_INITDB_ROOT_USERNAME";
     var rootPassword = "$MONGO_INITDB_ROOT_PASSWORD";
     var admin = db.getSiblingDB("admin");
