@@ -11,4 +11,4 @@ database:
   password: !ENV ${MONGO_PASSWORD}
   hostname: !ENV ${MONGO_HOSTNAME}
   port: !ENV ${MONGO_PORT}
-  database_name: !ENV ${MONGO_DATABASE}
+  database_name: !ENV ${MONGO_INITDB_DATABASE}
