@@ -30,4 +30,4 @@ WORKDIR /app
 COPY . /app
 
 # During debugging, this entry point will be overridden.
-CMD ["python", "/app/cpr/bot.py"]
+CMD ["python", "/app/modules/bot.py"]
