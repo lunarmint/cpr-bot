@@ -1,3 +1,4 @@
+import asyncio
 import glob
 import logging
 import os
@@ -10,17 +11,15 @@ import database
 from config import config
 
 bot = commands.Bot(
+    activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"]),
     command_prefix=config["bot"]["prefix"],
+    help_command=None,
     intents=discord.Intents(
+        emojis_and_stickers=True,
+        members=True,
         messages=True,
         message_content=True,
-        guilds=True,
-        members=True,
-        bans=True,
-        reactions=True,
     ),
-    case_insensitive=True,
-    help_command=None,
 )
 log = logging.getLogger(__name__)
 
@@ -31,13 +30,13 @@ async def on_ready() -> None:
     Called when the client is done preparing the data received from Discord.
     """
     log.info(f"Logged in as: {str(bot.user)}")
-    await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"])
-    )
+    await bot.tree.sync(guild=discord.Object(config["guild_id"]))
 
+
+async def main():
+    for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
+        await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
+    await bot.start(config["bot"]["token"])
 
 if __name__ == "__main__":
-    for cog in glob.iglob(os.path.join("modules/cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
-        bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
-    # database.Database().setup()
-    bot.run(config["bot"]["token"])
+    asyncio.run(main())
