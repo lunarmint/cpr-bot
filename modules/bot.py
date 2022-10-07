@@ -30,7 +30,7 @@ async def on_ready() -> None:
     Called when the client is done preparing the data received from Discord.
     """
     await bot.tree.sync(guild=discord.Object(config["guild_id"]))
-    log.info(f"Logged in as: {str(bot.user)}")
+    log.info(f"Logged in as: {bot.user}")
 
     guilds = [guild.id for guild in bot.guilds]
     log.info(f"Currently in {len(guilds)} guilds: {guilds}")
