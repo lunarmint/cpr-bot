@@ -24,22 +24,15 @@ bot = commands.Bot(
 log = logging.getLogger(__name__)
 
 
-@bot.event
-async def on_ready() -> None:
-    """
-    Called when the client is done preparing the data received from Discord.
-    """
-    await bot.tree.sync(guild=discord.Object(config["guild_id"]))
+async def main():
+    for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
+        await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
+
+    await bot.start(config["bot"]["token"])
     log.info(f"Logged in as: {bot.user}")
 
     guilds = [guild.id for guild in bot.guilds]
     log.info(f"Currently in {len(guilds)} guilds: {guilds}")
-
-
-async def main():
-    for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
-        await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
-    await bot.start(config["bot"]["token"])
 
 if __name__ == "__main__":
     asyncio.run(main())
