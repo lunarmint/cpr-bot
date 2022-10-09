@@ -43,11 +43,7 @@ class CreateCourseButton(discord.ui.View):
     @discord.ui.button(
         label="Create Course", style=discord.ButtonStyle.primary, custom_id="create_course_button", emoji="📖"
     )
-    async def create_course_button(
-        self,
-        interaction: discord.Interaction,
-        button: discord.ui.Button,
-    ) -> None:
+    async def create_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_modal(CreateCourseModal())
 
 
@@ -106,14 +102,22 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
-            description="Successfully created a new course.",
+            title="Course Created",
+            description="Successfully created a new course with the following information:",
+            fields=[
+                {"name": "Course Name:", "value": self.children[0].value, "inline": True},
+                {"name": "Course Abbreviation:", "value": self.children[1].value, "inline": True},
+                {"name": "Course Section:", "value": self.children[2].value, "inline": True},
+                {"name": "Semester:", "value": self.children[3].value, "inline": True},
+                {"name": "CRN:", "value": self.children[4].value, "inline": True},
+            ],
             color=discord.Color.green(),
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         embed = embeds.make_embed(
-            description="Oops! Something went wrong.",
+            description="Oops! Something went wrong. Please try again!",
             color=discord.Color.red(),
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
