@@ -18,7 +18,7 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
     @app_commands.command(name="create", description="Create a new courses.")
     async def create_course(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
-            title="Manage Course",
+            title="Create Course",
             description="You can add a new course using this interface.",
             footer="Use the button below to start.",
             color=discord.Color.blurple(),
@@ -26,7 +26,7 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
         await interaction.response.send_message(embed=embed, view=CreateCourseButton(), ephemeral=True)
 
     @app_commands.command(name="edit", description="Edit an existing course.")
-    async def edit_assignment(self, interaction: discord.Interaction) -> None:
+    async def edit_course(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
             title="Edit Course",
             description="You can edit an existing course using this interface.",
