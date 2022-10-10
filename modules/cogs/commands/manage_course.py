@@ -31,10 +31,11 @@ class CreateCourseButton(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Create Course", style=discord.ButtonStyle.primary, custom_id="create_course_button", emoji="📖"
+        label="Create Course", style=discord.ButtonStyle.green, custom_id="create_course_button", emoji="📖"
     )
     async def create_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_modal(CreateCourseModal())
+        await interaction.edit_original_response(view=None)
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
