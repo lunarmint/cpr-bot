@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from modules import config
+from modules import config, database
 from modules.utils import embeds
 
 log = logging.getLogger(__name__)
@@ -15,25 +15,15 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
         self.bot = bot
         super().__init__()
 
-    @app_commands.command(name="create", description="Create a new courses.")
-    async def create_course(self, interaction: discord.Interaction) -> None:
+    @app_commands.command(name="manage", description="Manage your courses.")
+    async def manage_course(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
-            title="Create Course",
-            description="You can add a new course using this interface.",
-            footer="Use the button below to start.",
+            title="Manage Course",
+            description="You can manage your courses using this interface.",
+            footer="Use the buttons below to start.",
             color=discord.Color.blurple(),
         )
         await interaction.response.send_message(embed=embed, view=CreateCourseButton(), ephemeral=True)
-
-    @app_commands.command(name="edit", description="Edit an existing course.")
-    async def edit_course(self, interaction: discord.Interaction) -> None:
-        embed = embeds.make_embed(
-            title="Edit Course",
-            description="You can edit an existing course using this interface.",
-            footer="Use the buttons below to interact.",
-            color=discord.Color.blurple(),
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class CreateCourseButton(discord.ui.View):
@@ -101,6 +91,16 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
         )
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        collection = database.Database().get_collection("courses")
+        course_document = {
+            "course_name": self.children[0].value,
+            "course_abbreviation": self.children[1].value,
+            "course_section": self.children[2].value,
+            "semester": self.children[3].value,
+            "crn": self.children[4].value,
+        }
+        collection.insert_one(course_document)
+
         embed = embeds.make_embed(
             title="Course Created",
             description="Successfully created a new course with the following information:",
@@ -121,6 +121,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             color=discord.Color.red(),
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
+        log.error(error)
 
 
 async def setup(bot: commands.Bot) -> None:
