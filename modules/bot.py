@@ -15,6 +15,7 @@ bot = commands.Bot(
     help_command=None,
     intents=discord.Intents(
         emojis_and_stickers=True,
+        guilds=True,
         members=True,
         messages=True,
         message_content=True,
