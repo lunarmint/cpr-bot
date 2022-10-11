@@ -3,9 +3,11 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
+from discord.ext import menus
 
 from modules import config, database
 from modules.utils import embeds
+from modules.utils.pagination import Paginate
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +18,7 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
         super().__init__()
 
     @app_commands.command(name="manage", description="Manage your courses.")
+    @app_commands.checks.has_role(config["roles"]["professor"])
     async def manage_course(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
             title="Manage Course",
@@ -23,10 +26,10 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
             footer="Use the buttons below to start.",
             color=discord.Color.blurple(),
         )
-        await interaction.response.send_message(embed=embed, view=CreateCourseButton(), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
 
 
-class CreateCourseButton(discord.ui.View):
+class ManageCourseButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
@@ -35,6 +38,38 @@ class CreateCourseButton(discord.ui.View):
     )
     async def create_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_modal(CreateCourseModal())
+        await interaction.edit_original_response(view=None)
+
+    @discord.ui.button(
+        label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course_button", emoji="🔧"
+    )
+    async def edit_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id}
+        results = collection.find(query)
+        data = []
+        for result in results:
+            data.append(result)
+
+        class Formatter(menus.ListPageSource):
+            async def format_page(self, menu, entries):
+                embed = embeds.make_embed(title="Your Courses", color=discord.Colour.blurple())
+                for key, value in entries:
+                    embed.add_field(name="​", value=value, inline=False)
+
+                return embed
+
+        formatter = Formatter(data, per_page=1)
+        menu = Paginate(formatter)
+        await interaction.response.defer()
+        await interaction.edit_original_response(view=None)
+        await menu.start(interaction)
+
+    @discord.ui.button(
+        label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course_button", emoji="⛔"
+    )
+    async def remove_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await interaction.response.defer()
         await interaction.edit_original_response(view=None)
 
 
@@ -94,6 +129,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("courses")
         course_document = {
+            "user_id": interaction.user.id,
             "course_name": self.children[0].value,
             "course_abbreviation": self.children[1].value,
             "course_section": self.children[2].value,
