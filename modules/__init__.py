@@ -8,7 +8,6 @@ import coloredlogs
 
 from config import config
 
-
 log_level = config["bot"]["log_level"]
 if not log_level:
     log_level = "NOTSET"
