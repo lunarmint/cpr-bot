@@ -3,11 +3,9 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ext import menus
 
 from modules import config, database
 from modules.utils import embeds
-from modules.utils.pagination import Paginate
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +52,7 @@ class ManageCourseButtons(discord.ui.View):
     )
     async def create_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
-        query = {"guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         result = collection.find_one(query)
         if result:
             embed = embeds.make_embed(
@@ -76,39 +74,74 @@ class ManageCourseButtons(discord.ui.View):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         await interaction.response.send_modal(CreateCourseModal())
-        await interaction.edit_original_response(view=None)
 
     @discord.ui.button(
         label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course_button", emoji="🔧"
     )
     async def edit_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id}
-        results = collection.find(query)
-        data = []
-        for result in results:
-            data.append(result)
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        result = collection.find_one(query)
+        if result is None:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Failed to edit course",
+                description="You don't have any courses yet. Use the 'Create Course' button to create one.",
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        class Formatter(menus.ListPageSource):
-            async def format_page(self, menu, entries):
-                embed = embeds.make_embed(title="Your Courses", color=discord.Colour.blurple())
-                for key, value in entries:
-                    embed.add_field(name="​", value=value, inline=False)
+        edit_course_modal = EditCourseModal()
+        items = (
+            discord.ui.TextInput(
+                label="Course Name:",
+                default=result["course_name"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+            discord.ui.TextInput(
+                label="Course Abbreviation:",
+                default=result["course_abbreviation"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+            discord.ui.TextInput(
+                label="Course Section:",
+                default=result["course_section"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+            discord.ui.TextInput(
+                label="Semester:",
+                default=result["semester"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+            discord.ui.TextInput(
+                label="CRN:",
+                default=result["crn"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+        )
 
-                return embed
+        for item in items:
+            edit_course_modal.add_item(item)
 
-        formatter = Formatter(data, per_page=1)
-        menu = Paginate(formatter)
-        await interaction.response.defer()
-        await interaction.edit_original_response(view=None)
-        await menu.start(interaction)
+        await interaction.response.send_modal(edit_course_modal)
 
     @discord.ui.button(
         label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course_button", emoji="⛔"
     )
     async def remove_course_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
-        await interaction.edit_original_response(view=None)
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
@@ -165,17 +198,23 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
         )
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        course_name = self.children[0].value
+        course_abbreviation = self.children[1].value
+        course_section = self.children[2].value
+        semester = self.children[3].value
+        crn = self.children[4].value
+
         collection = database.Database().get_collection("courses")
-        course_document = {
+        document = {
             "guild_id": interaction.guild.id,
             "user_id": interaction.user.id,
-            "course_name": self.children[0].value,
-            "course_abbreviation": self.children[1].value,
-            "course_section": self.children[2].value,
-            "semester": self.children[3].value,
-            "crn": self.children[4].value,
+            "course_name": course_name,
+            "course_abbreviation": course_abbreviation,
+            "course_section": course_section,
+            "semester": semester,
+            "crn": crn,
         }
-        collection.insert_one(course_document)
+        collection.insert_one(document)
 
         embed = embeds.make_embed(
             ctx=interaction,
@@ -185,11 +224,65 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             title="Course created",
             description="Successfully created a new course with the following information:",
             fields=[
-                {"name": "Course Name:", "value": self.children[0].value, "inline": False},
-                {"name": "Course Abbreviation:", "value": self.children[1].value, "inline": False},
-                {"name": "Course Section:", "value": self.children[2].value, "inline": False},
-                {"name": "Semester:", "value": self.children[3].value, "inline": False},
-                {"name": "CRN:", "value": self.children[4].value, "inline": False},
+                {"name": "Course Name:", "value": course_name, "inline": False},
+                {"name": "Course Abbreviation:", "value": course_abbreviation, "inline": False},
+                {"name": "Course Section:", "value": course_section, "inline": False},
+                {"name": "Semester:", "value": semester, "inline": False},
+                {"name": "CRN:", "value": crn, "inline": False},
+            ],
+        )
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        embed = embeds.make_embed(
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/M1WQDzo.png",
+            title="Error",
+            description="Oops! Something went wrong. Please try again later!",
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        log.error(error)
+
+
+class EditCourseModal(discord.ui.Modal, title="Edit Course"):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        course_name = self.children[0].value
+        course_abbreviation = self.children[1].value
+        course_section = self.children[2].value
+        semester = self.children[3].value
+        crn = self.children[4].value
+
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        new_value = {
+            "$set": {
+                "course_name": course_name,
+                "course_abbreviation": course_abbreviation,
+                "course_section": course_section,
+                "semester": semester,
+                "crn": crn,
+            }
+        }
+
+        collection.update_one(query, new_value)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Course updated",
+            description="Successfully updated course with the following information:",
+            fields=[
+                {"name": "Course Name:", "value": course_name, "inline": False},
+                {"name": "Course Abbreviation:", "value": course_abbreviation, "inline": False},
+                {"name": "Course Section:", "value": course_section, "inline": False},
+                {"name": "Semester:", "value": semester, "inline": False},
+                {"name": "CRN:", "value": crn, "inline": False},
             ],
         )
 
@@ -208,5 +301,4 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ManageCourseCog(bot))
-    log.info("Command loaded: course create")
-    log.info("Command loaded: course edit")
+    log.info("Command loaded: course manage")
