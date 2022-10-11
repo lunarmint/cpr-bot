@@ -1,11 +1,12 @@
 import datetime
+from typing import Union
 
 import discord
 from discord.ext import commands
 
 
 def make_embed(
-    ctx: commands.Context = None,
+    ctx: Union[commands.Context, discord.Interaction] = None,
     author: bool = None,
     title: str = "",
     description: str = "",
@@ -29,7 +30,11 @@ def make_embed(
         embed = discord.Embed(title=title, description=description, color=color)
 
     if ctx and author:
-        embed.set_author(icon_url=ctx.author.display_avatar, name=ctx.author.name)
+        if isinstance(ctx, commands.Context):
+            embed.set_author(icon_url=ctx.author.display_avatar, name=ctx.author.name)
+
+        if isinstance(ctx, discord.Interaction):
+            embed.set_author(icon_url=ctx.user.display_avatar, name=ctx.user.name)
 
     if title_url:
         embed.url = title_url
@@ -59,14 +64,14 @@ def make_embed(
     return embed
 
 
-async def success_message(ctx: commands.Context, description: str, title: str = None) -> None:
+async def success_message(ctx: Union[commands.Context, discord.Interaction], description: str, title: str = None) -> None:
     """Send a simple, self-destruct success message."""
     embed = make_embed(title=title if title else "Success:", description=description, color=discord.Color.green())
 
     await ctx.send(embed=embed, delete_after=30)
 
 
-async def error_message(ctx: commands.Context, description: str, title: str = None) -> None:
+async def error_message(ctx: Union[commands.Context, discord.Interaction], description: str, title: str = None) -> None:
     """Send a simple, self-destruct error message."""
     embed = make_embed(
         title=title if title else "Error:",
@@ -77,7 +82,7 @@ async def error_message(ctx: commands.Context, description: str, title: str = No
     await ctx.send(embed=embed, delete_after=30)
 
 
-async def warning_message(ctx: commands.Context, description: str, title: str = None) -> None:
+async def warning_message(ctx: Union[commands.Context, discord.Interaction], description: str, title: str = None) -> None:
     """Send a simple, self-destruct warning message."""
     embed = make_embed(
         title=title if title else "Warning:",
@@ -88,7 +93,7 @@ async def warning_message(ctx: commands.Context, description: str, title: str = 
     await ctx.send(embed=embed, delete_after=30)
 
 
-def error_embed(ctx: commands.Context, title: str, description: str, author: bool = True) -> discord.Embed:
+def error_embed(ctx: Union[commands.Context, discord.Interaction], title: str, description: str, author: bool = True) -> discord.Embed:
     """Make a basic error message embed."""
     return make_embed(
         ctx=ctx,
