@@ -1,11 +1,11 @@
-guild_ids: []
-emoji_guild_ids: []
 bot:
   token: your_bot_token
   prefix: "!"
   status: "your commands!"
   log_level: "INFO"
   webhook_url: "https://canary.discord.com/api/webhooks/000000000000000000/xxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+roles:
+  professor: 0000000000000000000
 database:
   username: !ENV ${MONGO_USERNAME}
   password: !ENV ${MONGO_PASSWORD}
