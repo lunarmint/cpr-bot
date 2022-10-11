@@ -137,6 +137,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("courses")
         course_document = {
+            "guild_id": interaction.guild.id,
             "user_id": interaction.user.id,
             "course_name": self.children[0].value,
             "course_abbreviation": self.children[1].value,
@@ -170,6 +171,6 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(ManageCourseCog(bot), guild=discord.Object(id=config["guild_id"]))
+    await bot.add_cog(ManageCourseCog(bot))
     log.info("Command loaded: course create")
     log.info("Command loaded: course edit")
