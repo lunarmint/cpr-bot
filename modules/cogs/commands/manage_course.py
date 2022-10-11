@@ -28,6 +28,14 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
         )
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
 
+    @manage_course.error
+    async def manage_course_error(self, interaction: discord.Interaction, error: discord.HTTPException):
+        if isinstance(error, discord.app_commands.errors.MissingRole):
+            embed = embeds.make_embed(
+                description=f"Role <@&{error.missing_role}> is required to use this command.",
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 class ManageCourseButtons(discord.ui.View):
     def __init__(self) -> None:
