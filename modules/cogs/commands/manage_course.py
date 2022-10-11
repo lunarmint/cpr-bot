@@ -69,7 +69,7 @@ class ManageCourseButtons(discord.ui.View):
                 ],
                 footer="Use the 'Edit Course' button if you wish to update the course information.",
             )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return await interaction.response.edit_message(embed=embed, view=None)
 
         await interaction.response.send_modal(CreateCourseModal())
 
@@ -85,9 +85,9 @@ class ManageCourseButtons(discord.ui.View):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Failed to edit course",
-                description="You don't have any courses yet. Use the 'Create Course' button to create one.",
+                description="You haven't created any courses yet. Use the 'Create Course' button to create one.",
             )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return await interaction.response.edit_message(embed=embed, view=None)
 
         edit_course_modal = EditCourseModal()
         items = (
@@ -135,7 +135,36 @@ class ManageCourseButtons(discord.ui.View):
 
     @discord.ui.button(label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course", emoji="⛔")
     async def remove_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await interaction.response.defer()
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        result = collection.find_one(query)
+        if result is None:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Failed to remove course",
+                description="Unable to remove course because you haven't created any courses yet.",
+            )
+            return await interaction.response.edit_message(embed=embed, view=None)
+        else:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.yellow(),
+                thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+                title="Warning",
+                description=f"This action is irreversible. Please confirm that you want to delete the following course:",
+                fields=[
+                    {"name": "Course Name:", "value": result["course_name"], "inline": False},
+                    {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
+                    {"name": "Course Section:", "value": result["course_section"], "inline": False},
+                    {"name": "Semester:", "value": result["semester"], "inline": False},
+                    {"name": "CRN:", "value": result["crn"], "inline": False},
+                ],
+            )
+            return await interaction.response.edit_message(embed=embed, view=RemoveCourseConfirmButtons())
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
@@ -226,7 +255,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             ],
         )
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         embed = embeds.make_embed(
@@ -280,7 +309,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             ],
         )
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         embed = embeds.make_embed(
@@ -291,6 +320,39 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
         log.error(error)
+
+
+class RemoveCourseConfirmButtons(discord.ui.View):
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green, custom_id="remove_course_yes")
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        collection.delete_one(query)
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Successfully deleted course",
+            description="Course was successfully deleted.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.red, custom_id="remove_course_no")
+    async def no(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Action cancelled",
+            description="Your course removal request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed)
+        await interaction.edit_original_response(view=None)
 
 
 async def setup(bot: commands.Bot) -> None:
