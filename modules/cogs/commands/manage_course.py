@@ -18,15 +18,38 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
     @app_commands.command(name="manage", description="Manage your courses.")
     @app_commands.checks.has_role(config["roles"]["professor"])
     async def manage_course(self, interaction: discord.Interaction) -> None:
-        embed = embeds.make_embed(
-            ctx=interaction,
-            author=True,
-            color=discord.Color.blurple(),
-            thumbnail_url="https://i.imgur.com/NBaYHQG.png",
-            title="Manage Course",
-            description="You can manage your course using this interface.",
-            footer="Use the buttons below to start.",
-        )
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        result = collection.find_one(query)
+
+        if result:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.blurple(),
+                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
+                title="Course information",
+                description="Your current course information:",
+                fields=[
+                    {"name": "Course Name:", "value": result["course_name"], "inline": False},
+                    {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
+                    {"name": "Course Section:", "value": result["course_section"], "inline": False},
+                    {"name": "Semester:", "value": result["semester"], "inline": False},
+                    {"name": "CRN:", "value": result["crn"], "inline": False},
+                ],
+                footer="Manage your course using the buttons below.",
+            )
+        else:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.blurple(),
+                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
+                title="Course information",
+                description="It seems that you haven't created any courses yet...",
+                footer="Manage your course using the buttons below.",
+            )
+
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
 
     @manage_course.error
