@@ -7,6 +7,12 @@ services:
     volumes:
         - ./config.yml:/app/config.yml
         - ./logs:/app/logs/
+    environment:
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_HOSTNAME: ${MONGO_HOSTNAME}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     depends_on:
         - mongo
   mongo:
