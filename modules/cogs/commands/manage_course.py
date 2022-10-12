@@ -24,7 +24,7 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/NBaYHQG.png",
             title="Manage Course",
-            description="You can manage your courses using this interface.",
+            description="You can manage your course using this interface.",
             footer="Use the buttons below to start.",
         )
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
@@ -347,7 +347,7 @@ class RemoveCourseConfirmButtons(discord.ui.View):
             ctx=interaction,
             author=True,
             color=discord.Color.blurple(),
-            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your course removal request was canceled.",
         )
