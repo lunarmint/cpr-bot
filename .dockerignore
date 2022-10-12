@@ -4,14 +4,13 @@ db/
 .git/
 .github/
 .idea/
-logs/
+scripts/
 .vscode/
 .env.example
 .gitattributes
 .gitignore
 build-app.sh
 config.example.yml
-config.yml
 docker-compose.yml
 Dockerfile
 LICENSE
