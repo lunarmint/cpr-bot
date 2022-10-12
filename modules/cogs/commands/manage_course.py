@@ -47,7 +47,7 @@ class ManageCourseButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Create Course", style=discord.ButtonStyle.green, custom_id="create_course", emoji="📖")
+    @discord.ui.button(label="Create Course", style=discord.ButtonStyle.green, custom_id="create_course")
     async def create_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
@@ -73,7 +73,7 @@ class ManageCourseButtons(discord.ui.View):
 
         await interaction.response.send_modal(CreateCourseModal())
 
-    @discord.ui.button(label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course", emoji="🔧")
+    @discord.ui.button(label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course")
     async def edit_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
@@ -133,7 +133,7 @@ class ManageCourseButtons(discord.ui.View):
 
         await interaction.response.send_modal(edit_course_modal)
 
-    @discord.ui.button(label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course", emoji="⛔")
+    @discord.ui.button(label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course")
     async def remove_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
@@ -326,7 +326,7 @@ class RemoveCourseConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green, custom_id="remove_course_yes")
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="remove_course_yes")
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
@@ -341,7 +341,7 @@ class RemoveCourseConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="No", style=discord.ButtonStyle.red, custom_id="remove_course_no")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="remove_course_no")
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             ctx=interaction,
