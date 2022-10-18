@@ -54,6 +54,7 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
 
     @manage_course.error
     async def manage_course_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+        log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingRole):
             embed = embeds.make_embed(
                 ctx=interaction,
@@ -281,6 +282,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
         await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/M1WQDzo.png",
@@ -288,7 +290,6 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             description="Oops! Something went wrong. Please try again later!",
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        log.error(error)
 
 
 class EditCourseModal(discord.ui.Modal, title="Edit Course"):
@@ -335,6 +336,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
         await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/M1WQDzo.png",
@@ -342,7 +344,6 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             description="Oops! Something went wrong. Please try again later!",
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        log.error(error)
 
 
 class RemoveCourseConfirmButtons(discord.ui.View):
