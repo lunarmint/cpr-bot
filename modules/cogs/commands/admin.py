@@ -63,8 +63,12 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @commands.Cog.listener()
+    @sync_global.error
+    @sync_guild.error
+    @sync_global_to_guild.error
+    @sync_remove.error
     async def sync_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+        log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingRole):
             embed = embeds.make_embed(
                 ctx=interaction,
@@ -74,7 +78,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
                 title="Error",
                 description=f"Role <@&{error.missing_role}> is required to use this command.",
             )
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:
