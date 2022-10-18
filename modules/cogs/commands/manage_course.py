@@ -380,4 +380,4 @@ class RemoveCourseConfirmButtons(discord.ui.View):
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ManageCourseCog(bot))
-    log.info("Command loaded: course manage")
+    log.info("Cog loaded: manage course")
