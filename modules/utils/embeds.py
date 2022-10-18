@@ -47,8 +47,8 @@ def make_embed(
 
     if fields:
         for field in fields:
-            name = field.get("name", "​")
-            value = field.get("value", "​")
+            name = field.get("name", "​") or "​"
+            value = field.get("value", "​") or "​"
             inline = field["inline"] if isinstance(field["inline"], bool) else False
             embed.add_field(name=name, value=value, inline=inline)
 
