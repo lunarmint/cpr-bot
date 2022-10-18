@@ -58,10 +58,23 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         self.bot.tree.clear_commands(guild=interaction.guild)
         await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
-            description=f"Cleared all commands from the current guild and synced.",
+            description="Cleared all commands from the current guild and synced.",
             color=discord.Color.green(),
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @commands.Cog.listener()
+    async def sync_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+        if isinstance(error, discord.app_commands.errors.MissingRole):
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description=f"Role <@&{error.missing_role}> is required to use this command.",
+            )
+            await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot: commands.Bot) -> None:
