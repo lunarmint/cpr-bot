@@ -375,8 +375,7 @@ class RemoveCourseConfirmButtons(discord.ui.View):
             title="Action cancelled",
             description="Your course removal request was canceled.",
         )
-        await interaction.response.edit_message(embed=embed)
-        await interaction.edit_original_response(view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 async def setup(bot: commands.Bot) -> None:
