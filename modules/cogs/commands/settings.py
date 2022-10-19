@@ -33,7 +33,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="role", description="Setup the professor role.")
-    @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.checks.has_permissions(manage_roles=True)
     async def role(self, interaction: discord.Interaction, role: discord.Role) -> None:
         collection = database.Database().get_collection("settings")
         query = {"professor": {"$exists": 1}}
@@ -70,7 +70,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"Manage server permission is required to use this command.",
+                description=f"Manage role permission is required to use this command.",
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
