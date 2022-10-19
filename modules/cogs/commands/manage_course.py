@@ -4,8 +4,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from modules import config, database
+from modules import database
 from modules.utils import embeds
+from modules.utils import helpers
 
 log = logging.getLogger(__name__)
 
@@ -16,8 +17,11 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
         super().__init__()
 
     @app_commands.command(name="manage", description="Manage your courses.")
-    @app_commands.checks.has_role(config["roles"]["professor"])
     async def manage_course(self, interaction: discord.Interaction) -> None:
+        embed = await helpers.professor_check(interaction)
+        if embed:
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         result = collection.find_one(query)
@@ -50,20 +54,6 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
                 footer="Manage your course using the buttons below.",
             )
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
-
-    @manage_course.error
-    async def manage_course_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
-        log.error(error)
-        if isinstance(error, discord.app_commands.errors.MissingRole):
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description=f"Role <@&{error.missing_role}> is required to use this command.",
-            )
-            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class ManageCourseButtons(discord.ui.View):
