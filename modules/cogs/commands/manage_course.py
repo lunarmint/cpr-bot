@@ -49,7 +49,6 @@ class ManageCourseCog(commands.GroupCog, group_name="course"):
                 description="It seems that you haven't created any courses yet...",
                 footer="Manage your course using the buttons below.",
             )
-
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
 
     @manage_course.error
@@ -278,7 +277,6 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
                 {"name": "CRN:", "value": crn, "inline": False},
             ],
         )
-
         await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
@@ -314,7 +312,6 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
                 "crn": crn,
             }
         }
-
         collection.update_one(query, new_value)
 
         embed = embeds.make_embed(
@@ -332,7 +329,6 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
                 {"name": "CRN:", "value": crn, "inline": False},
             ],
         )
-
         await interaction.response.edit_message(embed=embed, view=None)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
