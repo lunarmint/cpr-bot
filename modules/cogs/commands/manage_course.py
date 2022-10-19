@@ -171,7 +171,7 @@ class ManageCourseButtons(discord.ui.View):
                 title="Failed to remove course",
                 description="Unable to remove course because you haven't created any courses yet.",
             )
-            return await interaction.response.edit_message(embed=embed, view=None)
+            await interaction.response.edit_message(embed=embed, view=None)
         else:
             embed = embeds.make_embed(
                 ctx=interaction,
@@ -188,7 +188,7 @@ class ManageCourseButtons(discord.ui.View):
                     {"name": "CRN:", "value": result["crn"], "inline": False},
                 ],
             )
-            return await interaction.response.edit_message(embed=embed, view=RemoveCourseConfirmButtons())
+            await interaction.response.edit_message(embed=embed, view=RemoveCourseConfirmButtons())
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
