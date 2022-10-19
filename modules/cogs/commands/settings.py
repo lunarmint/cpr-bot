@@ -39,7 +39,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
     @app_commands.checks.has_permissions(manage_roles=True)
     async def role(self, interaction: discord.Interaction, role: discord.Role) -> None:
         collection = database.Database().get_collection("settings")
-        query = {"professor": {"$exists": 1}}
+        query = {"guild_id": interaction.guild_id}
         result = collection.find_one(query)
         if result:
             embed = embeds.make_embed(
@@ -48,7 +48,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.yellow(),
                 thumbnail_url="https://i.imgur.com/s1sRlvc.png",
                 title="Role already assigned",
-                description=f"The instructor permission is currently being assigned to the role <@&{result['professor']}>. "
+                description=f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
                 f"Do you wish to update it to {role.mention}?",
                 footer="Run this command again to change the role.",
             )
@@ -86,14 +86,14 @@ class UpdateRoleConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="update_role_yes")
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("settings")
-        query = {"professor": {"$exists": 1}}
+        query = {"guild_id": interaction.guild_id}
         result = collection.find_one(query)
 
         if result:
-            new_value = {"$set": {"professor": self.role.id}}
+            new_value = {"$set": {"role_id": self.role.id}}
             collection.update_one(query, new_value)
         else:
-            document = {"professor": self.role.id}
+            document = {"guild_id": interaction.guild_id, "role_id": self.role.id}
             collection.insert_one(document)
 
         embed = embeds.make_embed(

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 async def professor_check(interaction: discord.Interaction) -> discord.Embed:
     collection = database.Database().get_collection("settings")
-    query = {"professor": {"$exists": 1}}
+    query = {"guild_id": interaction.guild_id}
     result = collection.find_one(query)
 
     embed = embeds.make_embed(
@@ -25,6 +25,6 @@ async def professor_check(interaction: discord.Interaction) -> discord.Embed:
         embed.description = "No professor role was found. Use `/settings help` for more information."
         return embed
 
-    if not any(role.id == result["professor"] for role in interaction.user.roles):
-        embed.description = f"Role <@&{result['professor']}> is required to use this command."
+    if not any(role.id == result["role_id"] for role in interaction.user.roles):
+        embed.description = f"Role <@&{result['role_id']}> is required to use this command."
         return embed
