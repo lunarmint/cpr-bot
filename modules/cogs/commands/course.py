@@ -11,7 +11,7 @@ from modules.utils import helpers
 log = logging.getLogger(__name__)
 
 
-class ManageCourseCog(commands.GroupCog, group_name="course"):
+class CourseCog(commands.GroupCog, group_name="course"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         super().__init__()
@@ -365,5 +365,5 @@ class RemoveCourseConfirmButtons(discord.ui.View):
 
 
 async def setup(bot: commands.Bot) -> None:
-    await bot.add_cog(ManageCourseCog(bot))
-    log.info("Cog loaded: manage course")
+    await bot.add_cog(CourseCog(bot))
+    log.info("Cog loaded: course")
