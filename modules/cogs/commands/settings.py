@@ -60,6 +60,20 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             )
         await interaction.response.send_message(embed=embed, view=UpdateRoleConfirmButtons(role), ephemeral=True)
 
+    @role.error
+    async def role_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+        log.error(error)
+        if isinstance(error, discord.app_commands.errors.MissingPermissions):
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description=f"Manage server permission is required to use this command.",
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 class UpdateRoleConfirmButtons(discord.ui.View):
     def __init__(self, role: discord.Role) -> None:
