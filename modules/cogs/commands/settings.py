@@ -20,7 +20,10 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         description = (
             "To setup the bot:\n\n"
             "1. Make sure that you have the 'Manage Server' permission. If you don't, please contact your server owner.\n\n"
-            "2. Use the command `/settings role` and mention a role to assign the professor permission to it."
+            "2. Use the command `/settings role` and mention a role to assign the professor permission to it.\n\n"
+            "3. Use the command `/course manage` to manage your courses if you're an instructor.\n\n"
+            "4. Use the command `/team create` to create a new team.\n\n"
+            "5. Use the command `/team add` to add a student to a team, either by name or by ID."
         )
         embed = embeds.make_embed(
             ctx=interaction,
@@ -45,7 +48,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.yellow(),
                 thumbnail_url="https://i.imgur.com/s1sRlvc.png",
                 title="Role already assigned",
-                description=f"The professor permission is currently being assigned to the role <@&{result['professor']}>. "
+                description=f"The instructor permission is currently being assigned to the role <@&{result['professor']}>. "
                 f"Do you wish to update it to {role.mention}?",
                 footer="Run this command again to change the role.",
             )
@@ -56,7 +59,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.yellow(),
                 thumbnail_url="https://i.imgur.com/s1sRlvc.png",
                 title="Role update",
-                description=f"Are you sure you want to assign professor permission to the role {role.mention}?",
+                description=f"Are you sure you want to assign instructor permission to the role {role.mention}?",
             )
         await interaction.response.send_message(embed=embed, view=UpdateRoleConfirmButtons(role), ephemeral=True)
 
@@ -111,7 +114,7 @@ class UpdateRoleConfirmButtons(discord.ui.View):
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
-            description="Your professor role update request was canceled.",
+            description="Your instructor role update request was canceled.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
