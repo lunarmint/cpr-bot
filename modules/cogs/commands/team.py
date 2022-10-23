@@ -47,16 +47,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             )
             return await interaction.followup.send(embed=embed)
 
-        instructor_role = discord.utils.get(interaction.guild.roles, id=settings_result["role_id"])
-        team_role = await interaction.guild.create_role(name=name, hoist=True, mentionable=True)
         permission = {
-            instructor_role: discord.PermissionOverwrite(
-                read_messages=True,
-                manage_channels=True,
-                manage_permissions=True,
-                manage_messages=True,
-            ),
-            team_role: discord.PermissionOverwrite(read_messages=True),
             interaction.guild.default_role: discord.PermissionOverwrite(
                 read_messages=False,
                 manage_channels=False,
@@ -72,7 +63,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         team_document = {
             "name": name,
-            "role_id": team_role.id,
             "channel_id": team_channel.id,
         }
         teams_collection.insert_one(team_document)
@@ -83,7 +73,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
-            description=f"Team {team_channel.mention} and the role {team_role.mention} were successfully created.",
+            description=f"Team {team_channel.mention} was successfully created.",
         )
         await interaction.followup.send(embed=embed)
 
