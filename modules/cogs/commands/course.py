@@ -97,7 +97,7 @@ class ManageCourseButtons(discord.ui.View):
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Failed to edit course",
+                title="Error",
                 description="You haven't created any courses yet. Use the 'Create Course' button to create one.",
             )
             return await interaction.response.edit_message(embed=embed, view=None)
@@ -157,7 +157,7 @@ class ManageCourseButtons(discord.ui.View):
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Failed to remove course",
+                title="Error",
                 description="Unable to remove course because you haven't created any courses yet.",
             )
             await interaction.response.edit_message(embed=embed, view=None)
@@ -346,7 +346,7 @@ class RemoveCourseConfirmButtons(discord.ui.View):
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
-            title="Successfully deleted course",
+            title="Success",
             description="Course was successfully deleted.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
