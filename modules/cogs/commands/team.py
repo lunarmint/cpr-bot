@@ -20,6 +20,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.defer(ephemeral=True)
 
         teams_collection = database.Database().get_collection("teams")
+        name = name.lower()
         team_query = {"name": name}
         team_result = teams_collection.find_one(team_query)
         if team_result:
@@ -68,7 +69,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 manage_messages=False,
             ),
         }
-        formatted_name = name.replace(" ", "-").lower()
+        formatted_name = name.replace(" ", "-")
         team_category = await interaction.guild.create_category(name=name)
         team_channel = await interaction.guild.create_text_channel(
             name=formatted_name, category=team_category, overwrites=permission
