@@ -63,7 +63,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 title="Role update",
                 description=f"Are you sure you want to assign instructor permission to the role {role.mention}?",
             )
-        await interaction.response.send_message(embed=embed, view=UpdateRoleConfirmButtons(role), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=ConfirmButtons(role), ephemeral=True)
 
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
@@ -80,17 +80,16 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-class UpdateRoleConfirmButtons(discord.ui.View):
+class ConfirmButtons(discord.ui.View):
     def __init__(self, role: discord.Role) -> None:
         super().__init__(timeout=None)
         self.role = role
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="update_role_yes")
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="settings_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
         result = collection.find_one(query)
-
         if result:
             new_value = {"$set": {"role_id": self.role.id}}
             collection.update_one(query, new_value)
@@ -108,8 +107,8 @@ class UpdateRoleConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="update_role_no")
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="settings_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,

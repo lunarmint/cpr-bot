@@ -22,9 +22,39 @@ async def professor_check(interaction: discord.Interaction) -> discord.Embed:
     )
 
     if result is None:
-        embed.description = "No professor role was found. Use `/settings help` for more information."
+        embed.description = "No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission."
         return embed
 
     if not any(role.id == result["role_id"] for role in interaction.user.roles):
         embed.description = f"Role <@&{result['role_id']}> is required to use this command."
         return embed
+
+
+async def course_check(interaction: discord.Interaction) -> discord.Embed:
+    collection = database.Database().get_collection("courses")
+    query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+    result = collection.find_one(query)
+    if result is None:
+        return embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description="Cannot execute this action because this server is not associated with any courses yet.",
+        )
+
+
+async def role_check(interaction: discord.Interaction) -> discord.Embed:
+    collection = database.Database().get_collection("courses")
+    query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+    result = collection.find_one(query)
+    if result is None:
+        return embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description="Cannot execute this action because this server is not associated with any courses yet.",
+        )

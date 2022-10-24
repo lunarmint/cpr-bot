@@ -17,24 +17,22 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="create", description="Create a new team.")
     async def create(self, interaction: discord.Interaction, name: str) -> None:
-        await interaction.response.defer(ephemeral=True)
-
-        teams_collection = database.Database().get_collection("teams")
+        collection = database.Database().get_collection("teams")
         name_lowercase = name.lower()
-        team_query = {"name_lowercase": name_lowercase}
-        team_result = teams_collection.find_one(team_query)
-        if team_result:
+        query = {"name_lowercase": name_lowercase}
+        result = collection.find_one(query)
+        if result:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description="A team with this name already exist.",
+                description="A team with this name already exists.",
             )
-            return await interaction.followup.send(embed=embed)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        cursor = teams_collection.find()
+        cursor = collection.find()
         for document in cursor:
             if interaction.user.id in document["members"]:
                 embed = embeds.make_embed(
@@ -43,55 +41,19 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     color=discord.Color.red(),
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                     title="Error",
-                    description="You are already in a team.",
+                    description="You cannot create a new team because you are already in a team.",
                 )
-                return await interaction.followup.send(embed=embed)
-
-        settings_collection = database.Database().get_collection("settings")
-        settings_query = {"guild_id": interaction.guild_id}
-        settings_result = settings_collection.find_one(settings_query)
-        if not settings_result:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
-            )
-            return await interaction.followup.send(embed=embed)
-
-        permission = {
-            interaction.guild.default_role: discord.PermissionOverwrite(
-                read_messages=False,
-                manage_channels=False,
-                manage_permissions=False,
-                manage_messages=False,
-            ),
-        }
-        formatted_name = name_lowercase.replace(" ", "-")
-        team_category = await interaction.guild.create_category(name=name)
-        team_channel = await interaction.guild.create_text_channel(
-            name=formatted_name, category=team_category, overwrites=permission
-        )
-
-        team_document = {
-            "name": name,
-            "name_lowercase": name_lowercase,
-            "channel_id": team_channel.id,
-            "members": [],
-        }
-        teams_collection.insert_one(team_document)
+                return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
-            color=discord.Color.green(),
-            thumbnail_url="https://i.imgur.com/W7VJssL.png",
-            title="Success",
-            description=f"Team {team_channel.mention} was successfully created.",
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Create team",
+            description=f"Would you like to create a team with the name '{name}'?",
         )
-        await interaction.followup.send(embed=embed)
+        await interaction.response.send_message(embed=embed, view=CreateTeamConfirmButtons(name), ephemeral=True)
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
@@ -136,6 +98,63 @@ class TeamCog(commands.GroupCog, group_name="team"):
             description=f"You were successfully added to team '{team_result['name']}'.",
         )
         await interaction.followup.send(embed=embed)
+
+
+class CreateTeamConfirmButtons(discord.ui.View):
+    def __init__(self, name: str) -> None:
+        super().__init__(timeout=None)
+        self.name = name
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        teams_collection = database.Database().get_collection("teams")
+        name_lowercase = self.name.lower()
+
+        permission = {
+            interaction.guild.default_role: discord.PermissionOverwrite(
+                read_messages=False,
+                manage_channels=False,
+                manage_permissions=False,
+                manage_messages=False,
+            ),
+        }
+
+        formatted_name = name_lowercase.replace(" ", "-")
+        team_category = await interaction.guild.create_category(name=self.name)
+        team_channel = await interaction.guild.create_text_channel(
+            name=formatted_name, category=team_category, overwrites=permission
+        )
+
+        team_document = {
+            "guild_id": interaction.guild_id,
+            "channel_id": team_channel.id,
+            "name": self.name,
+            "name_lowercase": name_lowercase,
+            "members": [],
+        }
+        teams_collection.insert_one(team_document)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Success",
+            description=f"Team '{self.name}' was successfully created.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="team_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your team creation request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 async def setup(bot: commands.Bot) -> None:
