@@ -33,6 +33,19 @@ class TeamCog(commands.GroupCog, group_name="team"):
             )
             return await interaction.followup.send(embed=embed)
 
+        cursor = teams_collection.find()
+        for document in cursor:
+            if interaction.user.id in document["members"]:
+                embed = embeds.make_embed(
+                    ctx=interaction,
+                    author=True,
+                    color=discord.Color.red(),
+                    thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                    title="Error",
+                    description=f"You are already in a team.",
+                )
+                return await interaction.followup.send(embed=embed)
+
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
@@ -64,6 +77,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         team_document = {
             "name": name,
             "channel_id": team_channel.id,
+            "members": [],
         }
         teams_collection.insert_one(team_document)
 
