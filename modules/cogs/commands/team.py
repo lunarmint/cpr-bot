@@ -98,7 +98,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.defer(ephemeral=True)
 
         teams_collection = database.Database().get_collection("teams")
-        team_query = {"name": team.lower()}
+        team_query = {"name_lowercase": team.lower()}
         team_result = teams_collection.find_one(team_query)
         if team_result is None:
             embed = embeds.make_embed(
@@ -124,7 +124,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 )
                 return await interaction.followup.send(embed=embed)
 
-        new_value = {"$set": {"members": team_result["members"].append(interaction.user.id)}}
+        new_value = {"$push": {"members": interaction.user.id}}
         teams_collection.update_one(team_query, new_value)
 
         embed = embeds.make_embed(
