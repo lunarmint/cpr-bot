@@ -48,8 +48,10 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.yellow(),
                 thumbnail_url="https://i.imgur.com/s1sRlvc.png",
                 title="Role already assigned",
-                description=f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
-                f"Do you wish to update it to {role.mention}?",
+                description=(
+                    f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
+                    f"Do you wish to update it to {role.mention}?"
+                ),
                 footer="Run this command again to change the role.",
             )
         else:
@@ -73,7 +75,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"Manage role permission is required to use this command.",
+                description="Manage role permission is required to use this command.",
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 

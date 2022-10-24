@@ -168,7 +168,7 @@ class ManageCourseButtons(discord.ui.View):
                 color=discord.Color.yellow(),
                 thumbnail_url="https://i.imgur.com/s1sRlvc.png",
                 title="Warning",
-                description=f"This action is irreversible. Please confirm that you want to delete the following course:",
+                description="This action is irreversible. Please confirm that you want to delete the following course:",
                 fields=[
                     {"name": "Course Name:", "value": result["course_name"], "inline": False},
                     {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},

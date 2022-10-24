@@ -30,7 +30,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"A team with this name already exist.",
+                description="A team with this name already exist.",
             )
             return await interaction.followup.send(embed=embed)
 
@@ -43,7 +43,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     color=discord.Color.red(),
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                     title="Error",
-                    description=f"You are already in a team.",
+                    description="You are already in a team.",
                 )
                 return await interaction.followup.send(embed=embed)
 
@@ -57,7 +57,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
+                description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
             )
             return await interaction.followup.send(embed=embed)
 
@@ -107,7 +107,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"The specified team name does not exist.",
+                description="The specified team name does not exist.",
             )
             return await interaction.followup.send(embed=embed)
 
@@ -120,7 +120,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     color=discord.Color.red(),
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                     title="Error",
-                    description=f"You are already in a team.",
+                    description="You are already in a team.",
                 )
                 return await interaction.followup.send(embed=embed)
 
