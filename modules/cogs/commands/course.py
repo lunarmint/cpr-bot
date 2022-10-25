@@ -1,4 +1,5 @@
 import logging
+from typing import Mapping, Any
 
 import discord
 from discord import app_commands
@@ -53,19 +54,17 @@ class CourseCog(commands.GroupCog, group_name="course"):
                 description="It seems that you haven't created any courses yet...",
                 footer="Manage your course using the buttons below.",
             )
-        await interaction.response.send_message(embed=embed, view=ManageCourseButtons(), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=ManageCourseButtons(result), ephemeral=True)
 
 
 class ManageCourseButtons(discord.ui.View):
-    def __init__(self) -> None:
+    def __init__(self, result: Mapping[str, Any]) -> None:
         super().__init__(timeout=None)
+        self.result = result
 
     @discord.ui.button(label="Create Course", style=discord.ButtonStyle.green, custom_id="create_course")
     async def create_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
-        result = collection.find_one(query)
-        if result:
+        if self.result:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -74,11 +73,11 @@ class ManageCourseButtons(discord.ui.View):
                 title="Failed to create course",
                 description="This server is already being associated with the following course:",
                 fields=[
-                    {"name": "Course Name:", "value": result["course_name"], "inline": False},
-                    {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
-                    {"name": "Course Section:", "value": result["course_section"], "inline": False},
-                    {"name": "Semester:", "value": result["semester"], "inline": False},
-                    {"name": "CRN:", "value": result["crn"], "inline": False},
+                    {"name": "Course Name:", "value": self.result["course_name"], "inline": False},
+                    {"name": "Course Abbreviation:", "value": self.result["course_abbreviation"], "inline": False},
+                    {"name": "Course Section:", "value": self.result["course_section"], "inline": False},
+                    {"name": "Semester:", "value": self.result["semester"], "inline": False},
+                    {"name": "CRN:", "value": self.result["crn"], "inline": False},
                 ],
                 footer="Use the 'Edit Course' button if you wish to update the course information.",
             )
@@ -92,10 +91,6 @@ class ManageCourseButtons(discord.ui.View):
         if isinstance(result, discord.Embed):
             return await interaction.response.edit_message(embed=result, view=None)
 
-        collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
-        result = collection.find_one(query)
-        edit_course_modal = EditCourseModal()
         items = (
             discord.ui.TextInput(
                 label="Course Name:",
@@ -133,7 +128,7 @@ class ManageCourseButtons(discord.ui.View):
                 style=discord.TextStyle.short,
             ),
         )
-
+        edit_course_modal = EditCourseModal()
         for item in items:
             edit_course_modal.add_item(item)
 

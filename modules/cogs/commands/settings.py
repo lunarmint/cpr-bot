@@ -1,4 +1,5 @@
 import logging
+from typing import Mapping, Any
 
 import discord
 from discord import app_commands
@@ -52,7 +53,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                     f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
                     f"Do you wish to update it to {role.mention}?"
                 ),
-                footer="Run this command again to change the role.",
             )
         else:
             embed = embeds.make_embed(
@@ -63,7 +63,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 title="Role update",
                 description=f"Are you sure you want to assign instructor permission to the role {role.mention}?",
             )
-        await interaction.response.send_message(embed=embed, view=ConfirmButtons(role), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=ConfirmButtons(role, result), ephemeral=True)
 
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
@@ -81,16 +81,16 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
 
 class ConfirmButtons(discord.ui.View):
-    def __init__(self, role: discord.Role) -> None:
+    def __init__(self, role: discord.Role, result: Mapping[str, Any]) -> None:
         super().__init__(timeout=None)
         self.role = role
+        self.result = result
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="settings_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
-        result = collection.find_one(query)
-        if result:
+        if self.result:
             new_value = {"$set": {"role_id": self.role.id}}
             collection.update_one(query, new_value)
         else:
