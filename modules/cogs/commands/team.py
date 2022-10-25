@@ -57,8 +57,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
-        await interaction.response.defer(ephemeral=True)
-
         teams_collection = database.Database().get_collection("teams")
         team_query = {"name_lowercase": team.lower()}
         team_result = teams_collection.find_one(team_query)
@@ -71,7 +69,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 title="Error",
                 description="The specified team name does not exist.",
             )
-            return await interaction.followup.send(embed=embed)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         cursor = teams_collection.find()
         for document in cursor:
@@ -84,7 +82,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     title="Error",
                     description="You are already in a team.",
                 )
-                return await interaction.followup.send(embed=embed)
+                return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         new_value = {"$push": {"members": interaction.user.id}}
         teams_collection.update_one(team_query, new_value)
@@ -97,7 +95,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             title="Success",
             description=f"You were successfully added to team '{team_result['name']}'.",
         )
-        await interaction.followup.send(embed=embed)
+        return await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
@@ -105,7 +103,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
         super().__init__(timeout=None)
         self.name = name
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_confirm")
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="create_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
@@ -143,7 +141,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="team_cancel")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="create_team_confirm")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             ctx=interaction,
