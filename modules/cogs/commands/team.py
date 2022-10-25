@@ -48,10 +48,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
-            color=discord.Color.blurple(),
+            color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Create team",
-            description=f"Would you like to create a team with the name '{name}'?",
+            description=f"Create a new team with the name '{name}'?",
         )
         await interaction.response.send_message(embed=embed, view=CreateTeamConfirmButtons(name), ephemeral=True)
 
@@ -107,18 +107,16 @@ class CreateTeamConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        teams_collection = database.Database().get_collection("teams")
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
+
+        permission = {interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+
+        if not any(role.id == settings_result["role_id"] for role in interaction.user.roles):
+            permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
+
         name_lowercase = self.name.lower()
-
-        permission = {
-            interaction.guild.default_role: discord.PermissionOverwrite(
-                read_messages=False,
-                manage_channels=False,
-                manage_permissions=False,
-                manage_messages=False,
-            ),
-        }
-
         formatted_name = name_lowercase.replace(" ", "-")
         team_category = await interaction.guild.create_category(name=self.name)
         team_channel = await interaction.guild.create_text_channel(
@@ -132,6 +130,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "name_lowercase": name_lowercase,
             "members": [],
         }
+        teams_collection = database.Database().get_collection("teams")
         teams_collection.insert_one(team_document)
 
         embed = embeds.make_embed(
