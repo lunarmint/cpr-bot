@@ -20,6 +20,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
+        footer="Please contact your instructor or server owner if you are not one."
     )
 
     if result is None:
