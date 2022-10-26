@@ -158,7 +158,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
             title="Warning",
             description=f"You are currently in the team '{result['name']}'. Do you wish to leave?",
         )
-        await interaction.response.send_message(embed=embed, view=LeaveTeamConfirmButtons(result["name"]), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=LeaveTeamConfirmButtons(name=result["name"], channel_id=result["channel_id"]), ephemeral=True
+        )
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
@@ -270,9 +272,10 @@ class JoinTeamConfirmButtons(discord.ui.View):
 
 
 class LeaveTeamConfirmButtons(discord.ui.View):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, channel_id: int) -> None:
         super().__init__(timeout=None)
         self.name = name
+        self.channel_id = channel_id
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="leave_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -280,6 +283,9 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         query = {"members": interaction.user.id}
         value = {"$pull": {"members": interaction.user.id}}
         collection.update_one(query, value)
+
+        channel = discord.utils.get(interaction.guild.channels, id=self.channel_id)
+        await channel.set_permissions(interaction.user, overwrite=None)
 
         embed = embeds.make_embed(
             ctx=interaction,
