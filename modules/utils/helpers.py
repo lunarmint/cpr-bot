@@ -20,7 +20,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
-        footer="Please contact your instructor or server owner if you are not one."
+        footer="Please contact your instructor or server owner if you are not one.",
     )
 
     if result is None:
@@ -50,4 +50,22 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | Mapp
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
         description="Cannot execute this action because this server is not associated with any courses yet.",
+    )
+
+
+async def role_availability_check(interaction: discord.Interaction) -> discord.Embed | Mapping[str, Any]:
+    collection = database.Database().get_collection("settings")
+    query = {"guild_id": interaction.guild_id}
+    result = collection.find_one(query)
+    if result:
+        return result
+
+    return embeds.make_embed(
+        ctx=interaction,
+        author=True,
+        color=discord.Color.red(),
+        thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+        title="Error",
+        description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
+        footer="Please contact your instructor or server owner if you are not one.",
     )

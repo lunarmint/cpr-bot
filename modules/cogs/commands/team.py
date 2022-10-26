@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from modules import database
-from modules.utils import embeds
+from modules.utils import embeds, helpers
 
 log = logging.getLogger(__name__)
 
@@ -58,21 +58,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
-        settings_collection = database.Database().get_collection("settings")
-        settings_query = {"guild_id": interaction.guild_id}
-        settings_result = settings_collection.find_one(settings_query)
-
-        if settings_result is None:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
-                footer="Please contact your instructor or server owner if you are not one.",
-            )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+        settings_result = await helpers.role_availability_check(interaction)
+        if isinstance(settings_result, discord.Embed):
+            return await interaction.response.send_message(embed=settings_result, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
         new_team_query = {"name_lowercase": team.lower()}
@@ -161,6 +149,50 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.send_message(
             embed=embed, view=LeaveTeamConfirmButtons(name=result["name"], channel_id=result["channel_id"]), ephemeral=True
         )
+
+    @app_commands.command(name="view", description="View a list of all teams.")
+    async def view(self, interaction: discord.Interaction):
+        collection = database.Database().get_collection("teams")
+        teams_query = {"guild_id": interaction.guild_id}
+        teams_result = collection.find(teams_query)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
+            title="Team list",
+            footer="Your current team will be marked in bold.",
+        )
+
+        if teams_result is None:
+            embed.description = "No teams were found. Please try again later!"
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        current_team_query = {"members": interaction.user.id}
+        current_team_result = collection.find_one(current_team_query)
+
+        settings_result = await helpers.role_availability_check(interaction)
+        if isinstance(settings_result, discord.Embed):
+            return await interaction.response.send_message(embed=settings_result, ephemeral=True)
+
+        teams = []
+        for index, value in enumerate(teams_result):
+            if len(value["members"]) >= settings_result["team_size"]:
+                teams.append(f"{index + 1}. {value['name']} (full)")
+            else:
+                teams.append(f"{index + 1}. {value['name']}")
+
+        if not current_team_result:
+            embed.description = "\n".join(teams)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        for index, value in enumerate(teams):
+            if current_team_result["name"] in value:
+                teams[index] = f"**{value}**"
+
+        embed.description = "\n".join(teams)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
