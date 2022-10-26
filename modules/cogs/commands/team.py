@@ -58,9 +58,37 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
-        collection = database.Database().get_collection("teams")
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
+
+        if settings_result is None:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
+                footer="Please contact your instructor or server owner if you are not one.",
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        team_collection = database.Database().get_collection("teams")
         new_team_query = {"name_lowercase": team.lower()}
-        new_team_result = collection.find_one(new_team_query)
+        new_team_result = team_collection.find_one(new_team_query)
+
+        if len(new_team_result["members"]) >= settings_result["team_size"]:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description=f"The team '{new_team_result['name']}' is already full.",
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
         if new_team_result is None:
             embed = embeds.make_embed(
                 ctx=interaction,
@@ -73,7 +101,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         current_team_query = {"members": interaction.user.id}
-        current_team_result = collection.find_one(current_team_query)
+        current_team_result = team_collection.find_one(current_team_query)
 
         if current_team_result and current_team_result["name"] == new_team_result["name"]:
             embed = embeds.make_embed(
