@@ -48,20 +48,3 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | Mapp
         title="Error",
         description="Cannot execute this action because this server is not associated with any courses yet.",
     )
-
-
-async def role_check(interaction: discord.Interaction) -> discord.Embed | Mapping[str, Any]:
-    collection = database.Database().get_collection("courses")
-    query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
-    result = collection.find_one(query)
-    if result:
-        return result
-
-    return embeds.make_embed(
-        ctx=interaction,
-        author=True,
-        color=discord.Color.red(),
-        thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-        title="Error",
-        description="Cannot execute this action because this server is not associated with any courses yet.",
-    )
