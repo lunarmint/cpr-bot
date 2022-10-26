@@ -117,7 +117,11 @@ class CreateTeamConfirmButtons(discord.ui.View):
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
 
-        permission = {interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False)}
+        instructor_role = discord.utils.get(interaction.guild.roles, id=settings_result["role_id"])
+        permission = {
+            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            instructor_role: discord.PermissionOverwrite(read_messages=True),
+        }
 
         if not any(role.id == settings_result["role_id"] for role in interaction.user.roles):
             permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
