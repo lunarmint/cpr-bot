@@ -139,6 +139,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "name": self.name,
             "name_lowercase": name_lowercase,
             "members": [],
+            "locked": False,
         }
         teams_collection = database.Database().get_collection("teams")
         teams_collection.insert_one(team_document)
