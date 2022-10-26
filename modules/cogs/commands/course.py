@@ -19,9 +19,9 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
     @app_commands.command(name="manage", description="Manage your courses.")
     async def manage_course(self, interaction: discord.Interaction) -> None:
-        embed = await helpers.instructor_check(interaction)
-        if embed:
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+        result = await helpers.instructor_check(interaction)
+        if isinstance(result, discord.Embed):
+            return await interaction.response.send_message(embed=result, ephemeral=True)
 
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}

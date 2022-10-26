@@ -9,7 +9,7 @@ from modules.utils import embeds
 log = logging.getLogger(__name__)
 
 
-async def instructor_check(interaction: discord.Interaction) -> discord.Embed:
+async def instructor_check(interaction: discord.Interaction) -> discord.Embed | Mapping[str, Any]:
     collection = database.Database().get_collection("settings")
     query = {"guild_id": interaction.guild_id}
     result = collection.find_one(query)
@@ -31,6 +31,8 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed:
     if not any(role.id == result["role_id"] for role in interaction.user.roles):
         embed.description = f"Role <@&{result['role_id']}> is required to use this command."
         return embed
+
+    return result
 
 
 async def course_check(interaction: discord.Interaction) -> discord.Embed | Mapping[str, Any]:
