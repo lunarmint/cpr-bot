@@ -9,7 +9,7 @@ from modules.utils import embeds
 log = logging.getLogger(__name__)
 
 
-async def professor_check(interaction: discord.Interaction) -> discord.Embed:
+async def instructor_check(interaction: discord.Interaction) -> discord.Embed:
     collection = database.Database().get_collection("settings")
     query = {"guild_id": interaction.guild_id}
     result = collection.find_one(query)
