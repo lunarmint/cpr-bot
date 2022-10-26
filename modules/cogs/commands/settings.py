@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from modules import database
-from modules.utils import embeds
+from modules.utils import embeds, helpers
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 title="Role update",
                 description=f"Are you sure you want to assign instructor permission to the role {role.mention}?",
             )
-        await interaction.response.send_message(embed=embed, view=ConfirmButtons(role, result), ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=RoleConfirmButtons(role, result), ephemeral=True)
 
     @role.error
     async def role_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
@@ -79,14 +79,32 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    team = app_commands.Group(name="team", description="Set team size limit.")
 
-class ConfirmButtons(discord.ui.View):
+    @team.command(name="size", description="Set team size limit.")
+    async def team_size(self, interaction: discord.Interaction, size: int):
+        result = await helpers.instructor_check(interaction)
+        if isinstance(result, discord.Embed):
+            return await interaction.response.send_message(embed=result, ephemeral=True)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Team size update",
+            description=f"Update the team size limit from **{result['team_size']}** to **{size}**?",
+        )
+        await interaction.response.send_message(embed=embed, view=TeamSizeConfirmButtons(size), ephemeral=True)
+
+
+class RoleConfirmButtons(discord.ui.View):
     def __init__(self, role: discord.Role, result: Mapping[str, Any]) -> None:
         super().__init__(timeout=None)
         self.role = role
         self.result = result
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="settings_confirm")
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="role_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
@@ -94,7 +112,7 @@ class ConfirmButtons(discord.ui.View):
             new_value = {"$set": {"role_id": self.role.id}}
             collection.update_one(query, new_value)
         else:
-            document = {"guild_id": interaction.guild_id, "role_id": self.role.id}
+            document = {"guild_id": interaction.guild_id, "role_id": self.role.id, "team_size": 3}
             collection.insert_one(document)
 
         embed = embeds.make_embed(
@@ -107,7 +125,7 @@ class ConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="settings_cancel")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="role_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             ctx=interaction,
@@ -116,6 +134,41 @@ class ConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your instructor role update request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+
+class TeamSizeConfirmButtons(discord.ui.View):
+    def __init__(self, size: int) -> None:
+        super().__init__(timeout=None)
+        self.size = size
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_size_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("settings")
+        query = {"guild_id": interaction.guild_id}
+        new_value = {"$set": {"team_size": self.size}}
+        collection.update_one(query, new_value)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Team size updated",
+            description=f"Team size limit has been updated to {self.size}.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="team_size_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your team size limit update request was canceled.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
