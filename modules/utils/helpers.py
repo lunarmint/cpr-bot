@@ -23,7 +23,9 @@ async def professor_check(interaction: discord.Interaction) -> discord.Embed:
     )
 
     if result is None:
-        embed.description = "No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission."
+        embed.description = (
+            "No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission."
+        )
         return embed
 
     if not any(role.id == result["role_id"] for role in interaction.user.roles):

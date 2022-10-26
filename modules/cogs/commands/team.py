@@ -130,9 +130,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             title="Warning",
             description=f"You are currently in the team '{result['name']}'. Do you wish to leave?",
         )
-        await interaction.response.send_message(
-            embed=embed, view=LeaveTeamConfirmButtons(result["name"]), ephemeral=True
-        )
+        await interaction.response.send_message(embed=embed, view=LeaveTeamConfirmButtons(result["name"]), ephemeral=True)
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
