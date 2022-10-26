@@ -105,6 +105,35 @@ class TeamCog(commands.GroupCog, group_name="team"):
             ephemeral=True,
         )
 
+    @app_commands.command(name="leave", description="Leave the current team.")
+    async def leave(self, interaction: discord.Interaction) -> None:
+        collection = database.Database().get_collection("teams")
+        query = {"members": interaction.user.id}
+        result = collection.find_one(query)
+
+        if result is None:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description="Cannot leave team because you are not in any teams yet.",
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Warning",
+            description=f"You are currently in the team '{result['name']}'. Do you wish to leave?",
+        )
+        await interaction.response.send_message(
+            embed=embed, view=LeaveTeamConfirmButtons(result["name"]), ephemeral=True
+        )
+
 
 class CreateTeamConfirmButtons(discord.ui.View):
     def __init__(self, name: str) -> None:
@@ -190,6 +219,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
         new_team_query = {"name_lowercase": self.new_team["name_lowercase"]}
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
+
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
@@ -209,6 +239,41 @@ class JoinTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team join request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+
+class LeaveTeamConfirmButtons(discord.ui.View):
+    def __init__(self, name: str) -> None:
+        super().__init__(timeout=None)
+        self.name = name
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="leave_team_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("teams")
+        query = {"members": interaction.user.id}
+        value = {"$pull": {"members": interaction.user.id}}
+        collection.update_one(query, value)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Success",
+            description=f"You were successfully removed from the team '{self.name}'.",
+        )
+        return await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="leave_team_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your team leaving request was canceled.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
