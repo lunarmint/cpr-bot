@@ -247,6 +247,18 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         query = {"command": self.command}
         rate = int(self.rate.value)
         per = int(self.per.value)
+
+        if rate <= 0 or per <= 0:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/40eDcIB.png",
+                title="Invalid input",
+                description="All of your input values must be equal or greater than 1."
+            )
+            return await interaction.response.edit_message(embed=embed, view=None)
+
         new_value = {"$set": {"rate": rate, "per": per}}
         collection.update_one(query, new_value)
 
