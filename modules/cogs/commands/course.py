@@ -91,46 +91,13 @@ class ManageCourseButtons(discord.ui.View):
         if isinstance(result, discord.Embed):
             return await interaction.response.edit_message(embed=result, view=None)
 
-        items = (
-            discord.ui.TextInput(
-                label="Course Name:",
-                default=result["course_name"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
-            discord.ui.TextInput(
-                label="Course Abbreviation:",
-                default=result["course_abbreviation"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
-            discord.ui.TextInput(
-                label="Course Section:",
-                default=result["course_section"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
-            discord.ui.TextInput(
-                label="Semester:",
-                default=result["semester"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
-            discord.ui.TextInput(
-                label="CRN:",
-                default=result["crn"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
+        edit_course_modal = EditCourseModal(
+            course_name=result["course_name"],
+            course_abbreviation=result["course_abbreviation"],
+            course_section=result["course_section"],
+            semester=result["semester"],
+            crn=result["crn"],
         )
-        edit_course_modal = EditCourseModal()
-        for item in items:
-            edit_course_modal.add_item(item)
 
         await interaction.response.send_modal(edit_course_modal)
 
@@ -159,74 +126,60 @@ class ManageCourseButtons(discord.ui.View):
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.add_item(
-            discord.ui.TextInput(
-                label="Course Name:",
-                placeholder="Software Engineering",
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            )
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+        self.course_name = discord.ui.TextInput(
+            label="Course Name:",
+            placeholder="Software Engineering",
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.course_abbreviation = discord.ui.TextInput(
+            label="Course Abbreviation:",
+            placeholder="CSC495",
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.course_section = discord.ui.TextInput(
+            label="Course Section:",
+            placeholder="800",
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.semester = discord.ui.TextInput(
+            label="Semester:",
+            placeholder="Fall 2022",
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.crn = discord.ui.TextInput(
+            label="CRN:",
+            placeholder="12345",
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
         )
 
-        self.add_item(
-            discord.ui.TextInput(
-                label="Course Abbreviation:",
-                placeholder="CSC495",
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            )
-        )
-
-        self.add_item(
-            discord.ui.TextInput(
-                label="Course Section:",
-                placeholder="800",
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            )
-        )
-
-        self.add_item(
-            discord.ui.TextInput(
-                label="Semester:",
-                placeholder="Fall 2022",
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            )
-        )
-
-        self.add_item(
-            discord.ui.TextInput(
-                label="CRN:",
-                placeholder="12345",
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            )
-        )
+        self.add_item(self.course_name)
+        self.add_item(self.course_abbreviation)
+        self.add_item(self.course_section)
+        self.add_item(self.semester)
+        self.add_item(self.crn)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        course_name = self.children[0].value
-        course_abbreviation = self.children[1].value
-        course_section = self.children[2].value
-        semester = self.children[3].value
-        crn = self.children[4].value
-
         collection = database.Database().get_collection("courses")
         document = {
             "guild_id": interaction.guild.id,
             "user_id": interaction.user.id,
-            "course_name": course_name,
-            "course_abbreviation": course_abbreviation,
-            "course_section": course_section,
-            "semester": semester,
-            "crn": crn,
+            "course_name": self.course_name.value,
+            "course_abbreviation": self.course_abbreviation.value,
+            "course_section": self.course_section.value,
+            "semester": self.semester.value,
+            "crn": self.crn.value,
         }
         collection.insert_one(document)
 
@@ -238,11 +191,11 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             title="Course created",
             description="Successfully created a new course with the following information:",
             fields=[
-                {"name": "Course Name:", "value": course_name, "inline": False},
-                {"name": "Course Abbreviation:", "value": course_abbreviation, "inline": False},
-                {"name": "Course Section:", "value": course_section, "inline": False},
-                {"name": "Semester:", "value": semester, "inline": False},
-                {"name": "CRN:", "value": crn, "inline": False},
+                {"name": "Course Name:", "value": self.course_name.value, "inline": False},
+                {"name": "Course Abbreviation:", "value": self.course_abbreviation.value, "inline": False},
+                {"name": "Course Section:", "value": self.course_section.value, "inline": False},
+                {"name": "Semester:", "value": self.semester.value, "inline": False},
+                {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
         )
         await interaction.response.edit_message(embed=embed, view=None)
@@ -259,25 +212,67 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
 
 
 class EditCourseModal(discord.ui.Modal, title="Edit Course"):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        course_name: str,
+        course_abbreviation: str,
+        course_section: str,
+        semester: str,
+        crn: str,
+    ) -> None:
+        super().__init__(timeout=None)
+        self.course_name = discord.ui.TextInput(
+            label="Course Name:",
+            default=course_name,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.course_abbreviation = discord.ui.TextInput(
+            label="Course Abbreviation:",
+            default=course_abbreviation,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.course_section = discord.ui.TextInput(
+            label="Course Section:",
+            default=course_section,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.semester = discord.ui.TextInput(
+            label="Semester:",
+            default=semester,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.crn = discord.ui.TextInput(
+            label="CRN:",
+            default=crn,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+
+        self.add_item(self.course_name)
+        self.add_item(self.course_abbreviation)
+        self.add_item(self.course_section)
+        self.add_item(self.semester)
+        self.add_item(self.crn)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        course_name = self.children[0].value
-        course_abbreviation = self.children[1].value
-        course_section = self.children[2].value
-        semester = self.children[3].value
-        crn = self.children[4].value
-
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         new_value = {
             "$set": {
-                "course_name": course_name,
-                "course_abbreviation": course_abbreviation,
-                "course_section": course_section,
-                "semester": semester,
-                "crn": crn,
+                "course_name": self.course_name.value,
+                "course_abbreviation": self.course_abbreviation.value,
+                "course_section": self.course_section.value,
+                "semester": self.semester.value,
+                "crn": self.crn.value,
             }
         }
         collection.update_one(query, new_value)
@@ -290,11 +285,11 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             title="Course updated",
             description="Successfully updated course with the following information:",
             fields=[
-                {"name": "Course Name:", "value": course_name, "inline": False},
-                {"name": "Course Abbreviation:", "value": course_abbreviation, "inline": False},
-                {"name": "Course Section:", "value": course_section, "inline": False},
-                {"name": "Semester:", "value": semester, "inline": False},
-                {"name": "CRN:", "value": crn, "inline": False},
+                {"name": "Course Name:", "value": self.course_name.value, "inline": False},
+                {"name": "Course Abbreviation:", "value": self.course_abbreviation.value, "inline": False},
+                {"name": "Course Section:", "value": self.course_section.value, "inline": False},
+                {"name": "Semester:", "value": self.semester.value, "inline": False},
+                {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
         )
         await interaction.response.edit_message(embed=embed, view=None)

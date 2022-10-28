@@ -210,41 +210,43 @@ class CooldownDropdown(discord.ui.Select):
         query = {"command": self.values[0]}
         result = collection.find_one(query)
 
-        items = (
-            discord.ui.TextInput(
-                label="Rate:",
-                placeholder="Number of times the command can be used before triggering a cooldown.",
-                default=result["rate"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
-            discord.ui.TextInput(
-                label="Per:",
-                placeholder="The amount of seconds to wait for a cooldown when it’s been triggered.",
-                default=result["per"],
-                required=True,
-                max_length=1024,
-                style=discord.TextStyle.short,
-            ),
+        cooldown_modal = CooldownModal(
+            command=result["command"],
+            rate=result["rate"],
+            per=result["per"],
         )
-        cooldown_modal = CooldownModal(result["command"])
-        for item in items:
-            cooldown_modal.add_item(item)
-
         await interaction.response.send_modal(cooldown_modal)
 
 
 class CooldownModal(discord.ui.Modal, title="Cooldown"):
-    def __init__(self, command: str) -> None:
+    def __init__(self, command: str, rate: int, per: int) -> None:
         super().__init__()
         self.command = command
+        self.rate = discord.ui.TextInput(
+            label="Rate:",
+            placeholder="Number of times the command can be used before triggering a cooldown.",
+            default=str(rate),
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+        self.per = discord.ui.TextInput(
+            label="Per:",
+            placeholder="The amount of seconds to wait for a cooldown when it’s been triggered.",
+            default=str(per),
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+
+        self.add_item(self.rate)
+        self.add_item(self.per)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("cooldown")
         query = {"command": self.command}
-        rate = int(self.children[0].value)
-        per = int(self.children[1].value)
+        rate = int(self.rate.value)
+        per = int(self.per.value)
         new_value = {"$set": {"rate": rate, "per": per}}
         collection.update_one(query, new_value)
 

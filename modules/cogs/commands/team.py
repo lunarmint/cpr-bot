@@ -414,15 +414,7 @@ class RenameTeamConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="rename_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        item = discord.ui.TextInput(
-            label="New Team Name:",
-            default=self.name,
-            required=True,
-            max_length=1024,
-            style=discord.TextStyle.short,
-        )
-        rename_team_modal = RenameTeamModal(self.name)
-        await interaction.response.send_modal(rename_team_modal.add_item(item))
+        await interaction.response.send_modal(RenameTeamModal(self.name))
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="rename_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -438,12 +430,21 @@ class RenameTeamConfirmButtons(discord.ui.View):
 
 
 class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
-    def __init__(self, name: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, name: str) -> None:
+        super().__init__(timeout=None)
         self.name = name
+        self.new_name = discord.ui.TextInput(
+            label="New Team Name:",
+            default=self.name,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+
+        self.add_item(self.new_name)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        new_name = self.children[0].value
+        new_name = self.new_name.value
         collection = database.Database().get_collection("teams")
         query = {"members": interaction.user.id}
         result = collection.find_one(query)
@@ -482,7 +483,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.edit_message(embed=embed, ephemeral=True)
 
 
 async def setup(bot: commands.Bot) -> None:
