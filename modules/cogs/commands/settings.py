@@ -88,6 +88,17 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         collection = database.Database().get_collection("cooldown")
         query = {"guild_id": interaction.guild_id}
         results = collection.find(query)
+        if results is None:
+            commands_list = ["team rename"]
+            for command in commands_list:
+                document = {
+                    "guild_id": interaction.guild_id,
+                    "command": command,
+                    "rate": 1,
+                    "per": 1,
+                }
+                collection.insert_one(document)
+
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
@@ -255,7 +266,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/40eDcIB.png",
                 title="Invalid input",
-                description="All of your input values must be equal or greater than 1."
+                description="All of your input values must be equal or greater than 1.",
             )
             return await interaction.response.edit_message(embed=embed, view=None)
 
