@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Mapping
 
+import arrow
 import discord
 
 from modules import database
@@ -69,3 +70,67 @@ async def role_availability_check(interaction: discord.Interaction) -> discord.E
         description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
         footer="Please contact your instructor or server owner if you are not one.",
     )
+
+
+async def cooldown_check(interaction: discord.Interaction, command: str) -> discord.Embed | None:
+    settings_collection = database.Database().get_collection("settings")
+    settings_query = {"guild_id": interaction.guild_id}
+    settings_result = settings_collection.find_one(settings_query)
+    if settings_result and any(settings_result["role_id"] == role.id for role in interaction.user.roles):
+        return
+
+    collection = database.Database().get_collection("tasks")
+    query = {
+        "guild_id": interaction.guild_id,
+        "user_id": interaction.user.id,
+        "command": command,
+    }
+    result = collection.find_one(query)
+    if result and result["remaining"] == 0:
+        present = arrow.utcnow()
+        future = present.shift(seconds=result["ready_on"] - present.timestamp())
+        duration_string = future.humanize(present, granularity=["hour", "minute", "second"])
+        return embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/40eDcIB.png",
+            title="Error",
+            description=f"Your team name update request is on cooldown. Try again {duration_string}.",
+        )
+
+
+async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
+    settings_collection = database.Database().get_collection("settings")
+    settings_query = {"guild_id": interaction.guild_id}
+    settings_result = settings_collection.find_one(settings_query)
+    if settings_result and any(settings_result["role_id"] == role.id for role in interaction.user.roles):
+        return
+
+    cooldown_collection = database.Database().get_collection("cooldown")
+    cooldown_query = {"guild_id": interaction.guild_id, "command": command}
+    cooldown_result = cooldown_collection.find_one(cooldown_query)
+    if cooldown_result is None:
+        return
+
+    tasks_collection = database.Database().get_collection("tasks")
+    tasks_query = {
+        "guild_id": interaction.guild_id,
+        "user_id": interaction.user.id,
+        "command": command,
+    }
+    tasks_result = tasks_collection.find_one(tasks_query)
+    if tasks_result:
+        remaining = tasks_result["remaining"] - 1 if tasks_result["remaining"] > 1 else 0
+        new_value = {"$set": {"remaining": remaining}}
+        tasks_collection.update_one(tasks_query, new_value)
+
+    timestamp = arrow.utcnow().timestamp()
+    task_document = {
+        "guild_id": interaction.guild_id,
+        "user_id": interaction.user.id,
+        "command": command,
+        "ready_on": timestamp + cooldown_result["per"],
+        "remaining": cooldown_result["rate"] - 1,
+    }
+    tasks_collection.insert_one(task_document)
