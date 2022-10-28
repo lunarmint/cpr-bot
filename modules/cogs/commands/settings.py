@@ -79,6 +79,27 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    @app_commands.command(name="cooldown", description="Set cooldown for commands.")
+    async def cooldown(self, interaction: discord.Interaction):
+        result = await helpers.instructor_check(interaction)
+        if isinstance(result, discord.Embed):
+            return await interaction.response.send_message(embed=result, ephemeral=True)
+
+        collection = database.Database().get_collection("cooldown")
+        query = {"guild_id": interaction.guild_id}
+        results = collection.find(query)
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/PyLyqio.png",
+            title="Command cooldown",
+            description="Use the dropdown below to select a command and set a cooldown for it.",
+        )
+        options = [discord.SelectOption(label=result["command"]) for result in results]
+        cooldown_dropdown = CooldownDropdownView(options)
+        await interaction.response.send_message(embed=embed, view=cooldown_dropdown, ephemeral=True)
+
     team = app_commands.Group(name="team", description="Set team size limit.")
 
     @team.command(name="size", description="Set team size limit.")
@@ -169,6 +190,82 @@ class TeamSizeConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team size limit update request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+
+class CooldownDropdownView(discord.ui.View):
+    def __init__(self, options: list) -> None:
+        super().__init__(timeout=None)
+        self.add_item(CooldownDropdown(options))
+
+
+class CooldownDropdown(discord.ui.Select):
+    def __init__(self, options: list) -> None:
+        super().__init__()
+        self.options = options
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        collection = database.Database().get_collection("cooldown")
+        query = {"command": self.values[0]}
+        result = collection.find_one(query)
+
+        items = (
+            discord.ui.TextInput(
+                label="Rate:",
+                placeholder="Number of times the command can be used before triggering a cooldown.",
+                default=result["rate"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+            discord.ui.TextInput(
+                label="Per:",
+                placeholder="The amount of seconds to wait for a cooldown when it’s been triggered.",
+                default=result["per"],
+                required=True,
+                max_length=1024,
+                style=discord.TextStyle.short,
+            ),
+        )
+        cooldown_modal = CooldownModal(result["command"])
+        for item in items:
+            cooldown_modal.add_item(item)
+
+        await interaction.response.send_modal(cooldown_modal)
+
+
+class CooldownModal(discord.ui.Modal, title="Cooldown"):
+    def __init__(self, command: str) -> None:
+        super().__init__()
+        self.command = command
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        collection = database.Database().get_collection("cooldown")
+        query = {"command": self.command}
+        rate = int(self.children[0].value)
+        per = int(self.children[1].value)
+        new_value = {"$set": {"rate": rate, "per": per}}
+        collection.update_one(query, new_value)
+
+        seconds = "seconds" if per > 1 else "second"
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Command cooldown updated",
+            description=f"Successfully updated `/{self.command}` command's rate to {rate} per {per} {seconds}.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        log.error(error)
+        embed = embeds.make_embed(
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/M1WQDzo.png",
+            title="Error",
+            description="Oops! Something went wrong. Please try again later!",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 

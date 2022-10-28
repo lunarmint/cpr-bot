@@ -255,7 +255,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 class EditCourseModal(discord.ui.Modal, title="Edit Course"):
@@ -307,7 +307,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 class ConfirmButtons(discord.ui.View):
