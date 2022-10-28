@@ -66,7 +66,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         await interaction.response.send_message(embed=embed, view=RoleConfirmButtons(role, result), ephemeral=True)
 
     @role.error
-    async def role_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+    async def role_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(

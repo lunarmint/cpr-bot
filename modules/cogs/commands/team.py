@@ -243,7 +243,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.send_message(embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True)
 
     @rename.error
-    async def rename_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+    async def rename_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
         if isinstance(error, discord.app_commands.CommandOnCooldown):
             present = arrow.utcnow()
