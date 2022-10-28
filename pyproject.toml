@@ -9,6 +9,7 @@ readme = "README.md"
 repository = "https://github.com/lunarmint/cpr-bot"
 
 [tool.poetry.dependencies]
+arrow = "1.2.3"
 asyncpraw = "7.6.0"
 coloredlogs = "15.0.1"
 dataset = "1.5.2"
