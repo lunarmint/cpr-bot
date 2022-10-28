@@ -206,7 +206,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if result is None:
             return app_commands.Cooldown(rate=1, per=86400)
 
-        instructor_role = discord.utils.get(interaction.guild.roles, id=result["role_id"])
+        instructor_role = interaction.guild.get_role(result["role_id"])
         if instructor_role in interaction.user.roles:
             return None
 
@@ -271,7 +271,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
 
-        instructor_role = discord.utils.get(interaction.guild.roles, id=settings_result["role_id"])
+        instructor_role = interaction.guild.get_role(settings_result["role_id"])
         permission = {
             interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             instructor_role: discord.PermissionOverwrite(read_messages=True),
@@ -332,13 +332,13 @@ class JoinTeamConfirmButtons(discord.ui.View):
         collection = database.Database().get_collection("teams")
 
         if self.current_team:
-            channel = discord.utils.get(interaction.guild.channels, id=self.current_team["channel_id"])
+            channel = interaction.guild.get_channel(self.current_team["channel_id"])
             await channel.set_permissions(interaction.user, overwrite=None)
             current_team_query = {"name_lowercase": self.current_team["name_lowercase"]}
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
-        channel = discord.utils.get(interaction.guild.channels, id=self.new_team["channel_id"])
+        channel = interaction.guild.get_channel(self.new_team["channel_id"])
         await channel.set_permissions(interaction.user, read_messages=True)
 
         new_team_query = {"name_lowercase": self.new_team["name_lowercase"]}
@@ -381,7 +381,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         value = {"$pull": {"members": interaction.user.id}}
         collection.update_one(query, value)
 
-        channel = discord.utils.get(interaction.guild.channels, id=self.channel_id)
+        channel = interaction.guild.get_channel(self.channel_id)
         await channel.set_permissions(interaction.user, overwrite=None)
 
         embed = embeds.make_embed(
@@ -457,7 +457,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
         }
         collection.update_one(query, new_value)
 
-        channel = discord.utils.get(interaction.guild.channels, id=result["channel_id"])
+        channel = interaction.guild.get_channel(result["channel_id"])
         formatted_name = new_name_lowercase.replace(" ", "-")
         await channel.edit(name=formatted_name)
 
