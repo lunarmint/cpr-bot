@@ -85,10 +85,12 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         if isinstance(result, discord.Embed):
             return await interaction.response.send_message(embed=result, ephemeral=True)
 
-        collection = database.Database().get_collection("cooldown")
-        query = {"guild_id": interaction.guild_id}
-        results = collection.find(query)
-        if results is None:
+        cooldown_collection = database.Database().get_collection("cooldown")
+        cooldown_query = {"guild_id": interaction.guild_id}
+        cooldown_results = cooldown_collection.find(cooldown_query)
+
+        cooldown_result = cooldown_collection.find_one(cooldown_query)
+        if cooldown_result is None:
             commands_list = ["team rename"]
             for command in commands_list:
                 document = {
@@ -97,7 +99,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                     "rate": 1,
                     "per": 1,
                 }
-                collection.insert_one(document)
+                cooldown_collection.insert_one(document)
 
         embed = embeds.make_embed(
             ctx=interaction,
@@ -107,7 +109,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             title="Command cooldown",
             description="Use the dropdown below to select a command and set a cooldown for it.",
         )
-        options = [discord.SelectOption(label=result["command"]) for result in results]
+        options = [discord.SelectOption(label=result["command"]) for result in cooldown_results]
         cooldown_dropdown = CooldownDropdownView(options)
         await interaction.response.send_message(embed=embed, view=cooldown_dropdown, ephemeral=True)
 
