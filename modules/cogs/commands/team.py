@@ -18,11 +18,15 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="create", description="Create a new team.")
     async def create(self, interaction: discord.Interaction, name: str) -> None:
-        collection = database.Database().get_collection("teams")
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
+
+        team_collection = database.Database().get_collection("teams")
         name_lowercase = name.lower()
-        query = {"name_lowercase": name_lowercase}
-        result = collection.find_one(query)
-        if result:
+        team_query = {"name_lowercase": name_lowercase}
+        team_result = team_collection.find_one(team_query)
+        if team_result:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -33,7 +37,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        cursor = collection.find()
+        cursor = team_collection.find()
         for document in cursor:
             if interaction.user.id in document["members"]:
                 embed = embeds.make_embed(
@@ -58,6 +62,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
+
         settings_result = await helpers.role_availability_check(interaction)
         if isinstance(settings_result, discord.Embed):
             return await interaction.response.send_message(embed=settings_result, ephemeral=True)
@@ -126,11 +134,15 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="leave", description="Leave the current team.")
     async def leave(self, interaction: discord.Interaction) -> None:
-        collection = database.Database().get_collection("teams")
-        query = {"members": interaction.user.id}
-        result = collection.find_one(query)
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
 
-        if result is None:
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"members": interaction.user.id}
+        team_result = team_collection.find_one(team_query)
+
+        if team_result is None:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -147,17 +159,23 @@ class TeamCog(commands.GroupCog, group_name="team"):
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
-            description=f"You are currently in the team '{result['name']}'. Do you wish to leave?",
+            description=f"You are currently in the team '{team_result['name']}'. Do you wish to leave?",
         )
         await interaction.response.send_message(
-            embed=embed, view=LeaveTeamConfirmButtons(name=result["name"], channel_id=result["channel_id"]), ephemeral=True
+            embed=embed,
+            view=LeaveTeamConfirmButtons(name=team_result["name"], channel_id=team_result["channel_id"]),
+            ephemeral=True,
         )
 
     @app_commands.command(name="view", description="View a list of all teams.")
     async def view(self, interaction: discord.Interaction):
-        collection = database.Database().get_collection("teams")
-        teams_query = {"guild_id": interaction.guild_id}
-        teams_result = collection.find(teams_query)
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
+
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"guild_id": interaction.guild_id}
+        team_result = team_collection.find(team_query)
 
         embed = embeds.make_embed(
             ctx=interaction,
@@ -168,19 +186,19 @@ class TeamCog(commands.GroupCog, group_name="team"):
             footer="Your current team will be marked in bold.",
         )
 
-        if teams_result is None:
+        if team_result is None:
             embed.description = "No teams were found. Please try again later!"
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         current_team_query = {"members": interaction.user.id}
-        current_team_result = collection.find_one(current_team_query)
+        current_team_result = team_collection.find_one(current_team_query)
 
         settings_result = await helpers.role_availability_check(interaction)
         if isinstance(settings_result, discord.Embed):
             return await interaction.response.send_message(embed=settings_result, ephemeral=True)
 
         teams = []
-        for index, value in enumerate(teams_result):
+        for index, value in enumerate(team_result):
             if len(value["members"]) >= settings_result["team_size"]:
                 teams.append(f"{index + 1}. {value['name']} (full)")
             else:
@@ -199,14 +217,18 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="rename", description="Rename a team.")
     async def rename(self, interaction: discord.Interaction):
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
+
         embed = await helpers.cooldown_check(interaction=interaction, command="team rename")
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        collection = database.Database().get_collection("teams")
-        query = {"members": interaction.user.id}
-        result = collection.find_one(query)
-        if result is None:
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"members": interaction.user.id}
+        team_result = team_collection.find_one(team_query)
+        if team_result is None:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -228,7 +250,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 f"Your action will also be logged. Do you wish to continue?"
             ),
         )
-        await interaction.response.send_message(embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=RenameTeamConfirmButtons(team_result["name"]), ephemeral=True
+        )
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
@@ -266,8 +290,8 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "members": [],
             "locked": False,
         }
-        teams_collection = database.Database().get_collection("teams")
-        teams_collection.insert_one(team_document)
+        team_collection = database.Database().get_collection("teams")
+        team_collection.insert_one(team_document)
 
         embed = embeds.make_embed(
             ctx=interaction,
@@ -416,9 +440,9 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         new_name = self.new_name.value
-        teams_collection = database.Database().get_collection("teams")
-        teams_query = {"members": interaction.user.id}
-        teams_result = teams_collection.find_one(teams_query)
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"members": interaction.user.id}
+        team_result = team_collection.find_one(team_query)
 
         new_name_lowercase = new_name.lower()
         new_value = {
@@ -427,9 +451,9 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
                 "name_lowercase": new_name_lowercase,
             }
         }
-        teams_collection.update_one(teams_query, new_value)
+        team_collection.update_one(team_query, new_value)
 
-        channel = interaction.guild.get_channel(teams_result["channel_id"])
+        channel = interaction.guild.get_channel(team_result["channel_id"])
         formatted_name = new_name_lowercase.replace(" ", "-")
         await channel.edit(name=formatted_name)
 
