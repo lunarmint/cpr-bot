@@ -113,14 +113,14 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
     if task_result and task_result["remaining"] == 0:
         present = arrow.utcnow()
         future = present.shift(seconds=task_result["ready_on"] - present.timestamp())
-        duration_string = future.humanize(present, granularity=["hour", "minute", "second"])
+        duration_string = future.humanize(present, only_distance=True, granularity=["hour", "minute", "second"])
         return embeds.make_embed(
             ctx=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/40eDcIB.png",
             title="Error",
-            description=f"Your team name update request is on cooldown. Try again {duration_string}.",
+            description=f"Your team name update request is on cooldown. Please try again in:\n\n {duration_string}.",
         )
 
 
