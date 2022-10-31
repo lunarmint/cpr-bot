@@ -87,8 +87,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
         cooldown_collection = database.Database().get_collection("cooldown")
         cooldown_query = {"guild_id": interaction.guild_id}
-        cooldown_results = cooldown_collection.find(cooldown_query)
-
         cooldown_result = cooldown_collection.find_one(cooldown_query)
         if cooldown_result is None:
             commands_list = ["team rename"]
@@ -109,6 +107,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             title="Command cooldown",
             description="Use the dropdown below to select a command and set a cooldown for it.",
         )
+        cooldown_results = cooldown_collection.find(cooldown_query)
         options = [discord.SelectOption(label=result["command"]) for result in cooldown_results]
         cooldown_dropdown = CooldownDropdownView(options)
         await interaction.response.send_message(embed=embed, view=cooldown_dropdown, ephemeral=True)
