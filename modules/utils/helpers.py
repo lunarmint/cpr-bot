@@ -82,15 +82,14 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
         )
 
     if result and result["teams_locked"]:
-        embed = embeds.make_embed(
+        return embeds.make_embed(
             ctx=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
-            description="You can no longer create a new team because the operation is locked by the instructor.",
+            description="You can no longer create, join, leave, or update a team because those operations were locked by the instructor.",
         )
-        return await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def cooldown_check(interaction: discord.Interaction, command: str) -> discord.Embed | None:
