@@ -149,7 +149,12 @@ class RoleConfirmButtons(discord.ui.View):
             new_value = {"$set": {"role_id": self.role.id}}
             collection.update_one(query, new_value)
         else:
-            document = {"guild_id": interaction.guild_id, "role_id": self.role.id, "team_size": 3}
+            document = {
+                "guild_id": interaction.guild_id,
+                "role_id": self.role.id,
+                "team_size": 3,
+                "teams_locked": False,
+            }
             collection.insert_one(document)
 
         embed = embeds.make_embed(
