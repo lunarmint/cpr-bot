@@ -292,7 +292,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 ctx=interaction,
                 author=True,
                 color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                thumbnail_url="https://i.imgur.com/TwBPBrs.png",
                 title="Error",
                 description="Cannot lock teams because all teams are already locked.",
             )
@@ -302,7 +302,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             ctx=interaction,
             author=True,
             color=discord.Color.yellow(),
-            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            thumbnail_url="https://i.imgur.com/C3gWtnj.png",
             title="Warning",
             description=(
                 "You are about to lock all teams. This will prevent students from creating, joining, "
@@ -330,7 +330,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 ctx=interaction,
                 author=True,
                 color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                thumbnail_url="https://i.imgur.com/OidhOOU.png",
                 title="Error",
                 description="Cannot unlock teams because all teams are already unlocked.",
             )
@@ -340,7 +340,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             ctx=interaction,
             author=True,
             color=discord.Color.yellow(),
-            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            thumbnail_url="https://i.imgur.com/HVA4eCw.png",
             title="Warning",
             description=(
                 "You are about to unlock all teams. This will allow students to create, join, "
@@ -598,7 +598,7 @@ class LockTeamConfirmButtons(discord.ui.View):
             ctx=interaction,
             author=True,
             color=discord.Color.green(),
-            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            thumbnail_url="https://i.imgur.com/6620Buy.png",
             title="Teams locked",
             description=f"Successfully locked the following teams:\n\n{team_names}",
         )
@@ -637,7 +637,7 @@ class UnlockTeamConfirmButtons(discord.ui.View):
             ctx=interaction,
             author=True,
             color=discord.Color.green(),
-            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            thumbnail_url="https://i.imgur.com/OaGi4Xz.png",
             title="Teams unlocked",
             description=f"Successfully unlocked the following teams:\n\n{team_names}",
         )

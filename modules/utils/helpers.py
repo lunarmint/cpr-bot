@@ -89,7 +89,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
             ctx=interaction,
             author=True,
             color=discord.Color.red(),
-            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            thumbnail_url="https://i.imgur.com/TwBPBrs.png",
             title="Error",
             description="You can no longer create, join, leave, or update teams.",
             footer="Contact your instructor for more information.",
