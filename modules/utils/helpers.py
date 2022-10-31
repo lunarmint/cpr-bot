@@ -70,6 +70,9 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
     query = {"guild_id": interaction.guild_id}
     result = collection.find_one(query)
 
+    if result and any(result["role_id"] == role.id for role in interaction.user.roles):
+        return
+
     if result is None:
         return embeds.make_embed(
             ctx=interaction,
@@ -89,7 +92,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
             description="You can no longer create, join, leave, or update teams.",
-            footer="Contact your instructor for more information."
+            footer="Contact your instructor for more information.",
         )
 
 
@@ -100,16 +103,16 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
     if settings_result and any(settings_result["role_id"] == role.id for role in interaction.user.roles):
         return
 
-    collection = database.Database().get_collection("tasks")
-    query = {
+    task_collection = database.Database().get_collection("tasks")
+    task_query = {
         "guild_id": interaction.guild_id,
         "user_id": interaction.user.id,
         "command": command,
     }
-    result = collection.find_one(query)
-    if result and result["remaining"] == 0:
+    task_result = task_collection.find_one(task_query)
+    if task_result and task_result["remaining"] == 0:
         present = arrow.utcnow()
-        future = present.shift(seconds=result["ready_on"] - present.timestamp())
+        future = present.shift(seconds=task_result["ready_on"] - present.timestamp())
         duration_string = future.humanize(present, granularity=["hour", "minute", "second"])
         return embeds.make_embed(
             ctx=interaction,
