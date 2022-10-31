@@ -81,14 +81,15 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
             footer="Please contact your instructor or server owner if you are not one.",
         )
 
-    if result and result["teams_locked"]:
+    if result["teams_locked"]:
         return embeds.make_embed(
             ctx=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
-            description="You can no longer create, join, leave, or update a team because those operations were locked by the instructor.",
+            description="You can no longer create, join, leave, or update teams.",
+            footer="Contact your instructor for more information."
         )
 
 
