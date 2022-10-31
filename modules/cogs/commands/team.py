@@ -343,7 +343,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
             description=(
-                "You are about to lock all teams. This will allow students to create, join, "
+                "You are about to unlock all teams. This will allow students to create, join, "
                 "leave, and update team name. Do you wish to continue?"
             ),
             footer="Use '/team lock' if you wish to reverse this action at a later time.",
