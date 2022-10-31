@@ -284,17 +284,17 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        team_collection = database.Database().get_collection("teams")
-        team_query = {"locked": False}
-        team_result = team_collection.find_one(team_query)
-        if not team_result:
+        settings_collection = database.Database().get_collection("teams")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
+        if settings_result["teams_locked"]:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description="Cannot lock teams either because there are no teams or all teams are already locked.",
+                description="Cannot lock teams because all teams are already locked.",
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -322,17 +322,17 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        team_collection = database.Database().get_collection("teams")
-        team_query = {"locked": True}
-        team_result = team_collection.find_one(team_query)
-        if not team_result:
+        settings_collection = database.Database().get_collection("teams")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
+        if not settings_result["teams_locked"]:
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description="Cannot lock teams either because there are no teams or all teams are already unlocked.",
+                description="Cannot unlock teams because all teams are already unlocked.",
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -384,7 +384,6 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "name": self.name,
             "name_lowercase": name_lowercase,
             "members": [],
-            "locked": False,
         }
         team_collection = database.Database().get_collection("teams")
         team_collection.insert_one(team_document)
@@ -585,12 +584,16 @@ class LockTeamConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="lock_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        new_value = {"$set": {"teams_locked": True}}
+        settings_collection.update_one(settings_query, new_value)
+
         team_collection = database.Database().get_collection("teams")
-        team_query = {"locked": False}
+        team_query = {"guild_id": interaction.guild_id}
         team_results = team_collection.find(team_query)
         team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
         team_names = "\n".join(team_list)
-        team_collection.update_many(filter=team_query, update={"$set": {"locked": True}})
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
@@ -620,12 +623,16 @@ class UnlockTeamConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="unlock_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        new_value = {"$set": {"teams_locked": False}}
+        settings_collection.update_one(settings_query, new_value)
+
         team_collection = database.Database().get_collection("teams")
-        team_query = {"locked": True}
+        team_query = {"guild_id": interaction.guild_id}
         team_results = team_collection.find(team_query)
         team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
         team_names = "\n".join(team_list)
-        team_collection.update_many(filter=team_query, update={"$set": {"locked": False}})
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
