@@ -65,6 +65,34 @@ async def role_availability_check(interaction: discord.Interaction) -> discord.E
         )
 
 
+async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | None:
+    collection = database.Database().get_collection("settings")
+    query = {"guild_id": interaction.guild_id}
+    result = collection.find_one(query)
+
+    if result is None:
+        return embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
+            footer="Please contact your instructor or server owner if you are not one.",
+        )
+
+    if result and result["teams_locked"]:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description="You can no longer create a new team because the operation is locked by the instructor.",
+        )
+        return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
 async def cooldown_check(interaction: discord.Interaction, command: str) -> discord.Embed | None:
     settings_collection = database.Database().get_collection("settings")
     settings_query = {"guild_id": interaction.guild_id}

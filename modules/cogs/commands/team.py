@@ -20,7 +20,11 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def create(self, interaction: discord.Interaction, name: str) -> None:
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = await helpers.team_lock_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
         name_lowercase = name.lower()
@@ -64,9 +68,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def join(self, interaction: discord.Interaction, team: str) -> None:
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        embed = await helpers.role_availability_check(interaction)
+        embed = await helpers.team_lock_check(interaction)
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -140,7 +144,11 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def leave(self, interaction: discord.Interaction) -> None:
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = await helpers.team_lock_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"members": interaction.user.id}
@@ -175,7 +183,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def view(self, interaction: discord.Interaction):
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = await helpers.role_availability_check(interaction)
         if isinstance(embed, discord.Embed):
@@ -227,7 +235,11 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def rename(self, interaction: discord.Interaction):
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = await helpers.team_lock_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = await helpers.cooldown_check(interaction=interaction, command="team rename")
         if isinstance(embed, discord.Embed):
@@ -266,7 +278,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def lock(self, interaction: discord.Interaction):
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
@@ -304,7 +316,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
     async def unlock(self, interaction: discord.Interaction):
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.edit_message(embed=embed, view=None)
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
