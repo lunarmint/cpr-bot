@@ -246,13 +246,51 @@ class TeamCog(commands.GroupCog, group_name="team"):
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
             description=(
-                f"If you are not an instructor, updating your team name will set the command on a cooldown to prevent abuse. "
-                f"Your action will also be logged. Do you wish to continue?"
+                "If you are not an instructor, updating your team name will set the command on a cooldown to prevent abuse. "
+                "Your action will also be logged. Do you wish to continue?"
             ),
         )
         await interaction.response.send_message(
             embed=embed, view=RenameTeamConfirmButtons(team_result["name"]), ephemeral=True
         )
+
+    @app_commands.command(name="lock", description="Lock all teams.")
+    async def lock(self, interaction: discord.Interaction):
+        course_result = await helpers.course_check(interaction)
+        if isinstance(course_result, discord.Embed):
+            return await interaction.response.edit_message(embed=course_result, view=None)
+
+        instructor_result = await helpers.instructor_check(interaction)
+        if isinstance(instructor_result, discord.Embed):
+            return await interaction.response.send_message(embed=instructor_result, ephemeral=True)
+
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"locked": False}
+        team_result = team_collection.find_one(team_query)
+        if not team_result:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description="Cannot lock teams either because there are no teams or all teams are already locked.",
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Warning",
+            description=(
+                "You are about to lock all teams. This will prevent students from leaving, "
+                "joining, or updating their team name. Do you wish to continue?"
+            ),
+            footer="Use '/team unlock' if you wish to reverse this action at a later time.",
+        )
+        await interaction.response.send_message(embed=embed, view=LockTeamConfirmButtons(), ephemeral=True)
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
@@ -481,6 +519,41 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             description="Oops! Something went wrong. Please try again later!",
         )
         await interaction.response.edit_message(embed=embed, ephemeral=True)
+
+
+class LockTeamConfirmButtons(discord.ui.View):
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="lock_team_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"locked": False}
+        team_results = team_collection.find(team_query)
+        team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
+        team_names = "\n".join(team_list)
+        team_collection.update_many(filter={"locked": False}, update={"$set": {"locked": True}})
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Teams locked",
+            description=f"Successfully locked the following teams:\n\n{team_names}",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="lock_team_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your team lock request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 async def setup(bot: commands.Bot) -> None:
