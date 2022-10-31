@@ -18,9 +18,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="create", description="Create a new team.")
     async def create(self, interaction: discord.Interaction, name: str) -> None:
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
         team_collection = database.Database().get_collection("teams")
         name_lowercase = name.lower()
@@ -62,13 +62,17 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="join", description="Join a team.")
     async def join(self, interaction: discord.Interaction, team: str) -> None:
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
-        settings_result = await helpers.role_availability_check(interaction)
-        if isinstance(settings_result, discord.Embed):
-            return await interaction.response.send_message(embed=settings_result, ephemeral=True)
+        embed = await helpers.role_availability_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
 
         team_collection = database.Database().get_collection("teams")
         new_team_query = {"name_lowercase": team.lower()}
@@ -134,9 +138,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="leave", description="Leave the current team.")
     async def leave(self, interaction: discord.Interaction) -> None:
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"members": interaction.user.id}
@@ -169,9 +173,17 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="view", description="View a list of all teams.")
     async def view(self, interaction: discord.Interaction):
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
+
+        embed = await helpers.role_availability_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"guild_id": interaction.guild_id}
@@ -193,10 +205,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         current_team_query = {"members": interaction.user.id}
         current_team_result = team_collection.find_one(current_team_query)
 
-        settings_result = await helpers.role_availability_check(interaction)
-        if isinstance(settings_result, discord.Embed):
-            return await interaction.response.send_message(embed=settings_result, ephemeral=True)
-
         teams = []
         for index, value in enumerate(team_result):
             if len(value["members"]) >= settings_result["team_size"]:
@@ -217,9 +225,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="rename", description="Rename a team.")
     async def rename(self, interaction: discord.Interaction):
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
         embed = await helpers.cooldown_check(interaction=interaction, command="team rename")
         if isinstance(embed, discord.Embed):
@@ -256,13 +264,13 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="lock", description="Lock all teams.")
     async def lock(self, interaction: discord.Interaction):
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
-        instructor_result = await helpers.instructor_check(interaction)
-        if isinstance(instructor_result, discord.Embed):
-            return await interaction.response.send_message(embed=instructor_result, ephemeral=True)
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"locked": False}
@@ -294,13 +302,13 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
     @app_commands.command(name="unlock", description="Unlock all teams.")
     async def unlock(self, interaction: discord.Interaction):
-        course_result = await helpers.course_check(interaction)
-        if isinstance(course_result, discord.Embed):
-            return await interaction.response.edit_message(embed=course_result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
 
-        instructor_result = await helpers.instructor_check(interaction)
-        if isinstance(instructor_result, discord.Embed):
-            return await interaction.response.send_message(embed=instructor_result, ephemeral=True)
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"locked": True}

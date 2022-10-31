@@ -19,9 +19,9 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
     @app_commands.command(name="manage", description="Manage your courses.")
     async def manage_course(self, interaction: discord.Interaction) -> None:
-        result = await helpers.instructor_check(interaction)
-        if isinstance(result, discord.Embed):
-            return await interaction.response.send_message(embed=result, ephemeral=True)
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
@@ -87,9 +87,13 @@ class ManageCourseButtons(discord.ui.View):
 
     @discord.ui.button(label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course")
     async def edit_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        result = await helpers.course_check(interaction)
-        if isinstance(result, discord.Embed):
-            return await interaction.response.edit_message(embed=result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
+
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        result = collection.find_one(query)
 
         edit_course_modal = EditCourseModal(
             course_name=result["course_name"],
@@ -103,9 +107,13 @@ class ManageCourseButtons(discord.ui.View):
 
     @discord.ui.button(label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course")
     async def remove_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        result = await helpers.course_check(interaction)
-        if isinstance(result, discord.Embed):
-            return await interaction.response.edit_message(embed=result, view=None)
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.edit_message(embed=embed, view=None)
+
+        collection = database.Database().get_collection("courses")
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        result = collection.find_one(query)
 
         embed = embeds.make_embed(
             ctx=interaction,

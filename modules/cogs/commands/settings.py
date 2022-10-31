@@ -81,9 +81,9 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
     @app_commands.command(name="cooldown", description="Set cooldown for commands.")
     async def cooldown(self, interaction: discord.Interaction):
-        result = await helpers.instructor_check(interaction)
-        if isinstance(result, discord.Embed):
-            return await interaction.response.send_message(embed=result, ephemeral=True)
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         cooldown_collection = database.Database().get_collection("cooldown")
         cooldown_query = {"guild_id": interaction.guild_id}
@@ -116,9 +116,13 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
     @team.command(name="size", description="Set team size limit.")
     async def team_size(self, interaction: discord.Interaction, size: int):
-        result = await helpers.instructor_check(interaction)
-        if isinstance(result, discord.Embed):
-            return await interaction.response.send_message(embed=result, ephemeral=True)
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        collection = database.Database().get_collection("settings")
+        query = {"guild_id": interaction.guild_id}
+        result = collection.find_one(query)
 
         embed = embeds.make_embed(
             ctx=interaction,
