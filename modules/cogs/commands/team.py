@@ -284,7 +284,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        settings_collection = database.Database().get_collection("teams")
+        settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
         if settings_result["teams_locked"]:
@@ -322,7 +322,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        settings_collection = database.Database().get_collection("teams")
+        settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
         if not settings_result["teams_locked"]:
