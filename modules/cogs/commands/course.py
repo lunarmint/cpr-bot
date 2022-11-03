@@ -31,7 +31,6 @@ class CourseCog(commands.GroupCog, group_name="course"):
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
-                color=discord.Color.blurple(),
                 thumbnail_url="https://i.imgur.com/NBaYHQG.png",
                 title="Course information",
                 description="Your current course information:",
@@ -42,7 +41,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
                     {"name": "Semester:", "value": result["semester"], "inline": False},
                     {"name": "CRN:", "value": result["crn"], "inline": False},
                 ],
-                footer="Manage your course using the buttons below.",
+                timestamp=True,
             )
         else:
             embed = embeds.make_embed(
@@ -52,7 +51,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
                 thumbnail_url="https://i.imgur.com/NBaYHQG.png",
                 title="Course information",
                 description="It seems that you haven't created any courses yet...",
-                footer="Manage your course using the buttons below.",
+                timestamp=True,
             )
         await interaction.response.send_message(embed=embed, view=ManageCourseButtons(result), ephemeral=True)
 
@@ -79,7 +78,8 @@ class ManageCourseButtons(discord.ui.View):
                     {"name": "Semester:", "value": self.result["semester"], "inline": False},
                     {"name": "CRN:", "value": self.result["crn"], "inline": False},
                 ],
-                footer="Use the 'Edit Course' button if you wish to update the course information.",
+                footer="Use the 'Edit Course' button if you wish to update the current course's information instead.",
+                timestamp=True,
             )
             return await interaction.response.edit_message(embed=embed, view=None)
 
@@ -121,7 +121,7 @@ class ManageCourseButtons(discord.ui.View):
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
-            description="This action is irreversible. Please confirm that you want to delete the following course:",
+            description="This action is **irreversible**. Please confirm that you want to delete the following course:",
             fields=[
                 {"name": "Course Name:", "value": result["course_name"], "inline": False},
                 {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
@@ -205,6 +205,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
                 {"name": "Semester:", "value": self.semester.value, "inline": False},
                 {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -215,6 +216,8 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             thumbnail_url="https://i.imgur.com/M1WQDzo.png",
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
+            footer="Contact Mint#0504 if you wish to report the bug.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -299,6 +302,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
                 {"name": "Semester:", "value": self.semester.value, "inline": False},
                 {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -309,6 +313,8 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             thumbnail_url="https://i.imgur.com/M1WQDzo.png",
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
+            footer="Contact Mint#0504 if you wish to report the bug.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -329,6 +335,7 @@ class ConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
             description="Course was successfully deleted.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -341,6 +348,7 @@ class ConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your course removal request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
