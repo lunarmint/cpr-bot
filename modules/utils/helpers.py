@@ -2,6 +2,7 @@ import logging
 
 import arrow
 import discord
+from discord.ext import commands
 
 from modules import database
 from modules.utils import embeds
@@ -158,3 +159,18 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
         "remaining": cooldown_result["rate"] - 1,
     }
     tasks_collection.insert_one(task_document)
+
+
+async def get_command(bot: commands.Bot, command: str, subcommand_group: str = None, subcommand: str = None):
+    commands_list = await bot.tree.fetch_commands()
+    for index, value in enumerate(commands_list):
+        if value.name == command and subcommand_group is None:
+            return value
+
+        for option in value.options:
+            if option.name == subcommand_group and subcommand is None:
+                return option
+
+            for item in option.options:
+                if item.name == subcommand:
+                    return item
