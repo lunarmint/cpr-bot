@@ -33,7 +33,7 @@ def make_embed(
     if isinstance(color, int | discord.colour.Colour):
         embed.colour = color
     else:
-        embed.colour = discord.Colour.blurple()
+        embed.colour = 0x2F3136
 
     if fields:
         for field in fields:
