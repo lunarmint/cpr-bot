@@ -2,6 +2,7 @@ import logging
 
 import arrow
 import discord
+from discord.app_commands import AppCommand, AppCommandGroup
 from discord.ext import commands
 
 from modules import database
@@ -161,7 +162,9 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
     tasks_collection.insert_one(task_document)
 
 
-async def get_command(bot: commands.Bot, command: str, subcommand_group: str = None, subcommand: str = None):
+async def get_command(
+    bot: commands.Bot, command: str, subcommand_group: str = None, subcommand: str = None
+) -> AppCommand | AppCommandGroup:
     commands_list = await bot.tree.fetch_commands()
     for index, value in enumerate(commands_list):
         if value.name == command and subcommand_group is None:
