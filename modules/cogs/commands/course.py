@@ -1,5 +1,4 @@
 import logging
-from typing import Mapping, Any
 
 import discord
 from discord import app_commands
@@ -27,7 +26,19 @@ class CourseCog(commands.GroupCog, group_name="course"):
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         result = collection.find_one(query)
 
-        if result:
+        create_course_button = CreateCourseButton()
+        if result is None:
+            embed = embeds.make_embed(
+                ctx=interaction,
+                author=True,
+                color=discord.Color.blurple(),
+                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
+                title="Course information",
+                description="It seems that you haven't created any courses yet...",
+                timestamp=True,
+            )
+        else:
+            create_course_button.disabled = True
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -43,50 +54,33 @@ class CourseCog(commands.GroupCog, group_name="course"):
                 ],
                 timestamp=True,
             )
-        else:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.blurple(),
-                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
-                title="Course information",
-                description="It seems that you haven't created any courses yet...",
-                timestamp=True,
-            )
-        await interaction.response.send_message(embed=embed, view=ManageCourseButtons(result), ephemeral=True)
+
+        manage_course_buttons = discord.ui.View()
+        manage_course_buttons.add_item(create_course_button)
+        manage_course_buttons.add_item(EditCourseButton())
+        manage_course_buttons.add_item(RemoveCourseButton())
+        await interaction.response.send_message(embed=embed, view=manage_course_buttons, ephemeral=True)
 
 
-class ManageCourseButtons(discord.ui.View):
-    def __init__(self, result: Mapping[str, Any]) -> None:
-        super().__init__(timeout=None)
-        self.result = result
+class CreateCourseButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Create Course"
+        self.style = discord.ButtonStyle.green
+        self.custom_id = "create_course"
 
-    @discord.ui.button(label="Create Course", style=discord.ButtonStyle.green, custom_id="create_course")
-    async def create_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        if self.result:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Failed to create course",
-                description="This server is already being associated with the following course:",
-                fields=[
-                    {"name": "Course Name:", "value": self.result["course_name"], "inline": False},
-                    {"name": "Course Abbreviation:", "value": self.result["course_abbreviation"], "inline": False},
-                    {"name": "Course Section:", "value": self.result["course_section"], "inline": False},
-                    {"name": "Semester:", "value": self.result["semester"], "inline": False},
-                    {"name": "CRN:", "value": self.result["crn"], "inline": False},
-                ],
-                footer="Use the 'Edit Course' button if you wish to update the current course's information instead.",
-                timestamp=True,
-            )
-            return await interaction.response.edit_message(embed=embed, view=None)
-
+    async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_modal(CreateCourseModal())
 
-    @discord.ui.button(label="Edit Course", style=discord.ButtonStyle.primary, custom_id="edit_course")
-    async def edit_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+
+class EditCourseButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Edit Course"
+        self.style = discord.ButtonStyle.primary
+        self.custom_id = "edit_course"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
             return await interaction.response.edit_message(embed=embed, view=None)
@@ -102,11 +96,17 @@ class ManageCourseButtons(discord.ui.View):
             semester=result["semester"],
             crn=result["crn"],
         )
-
         await interaction.response.send_modal(edit_course_modal)
 
-    @discord.ui.button(label="Remove Course", style=discord.ButtonStyle.red, custom_id="remove_course")
-    async def remove_course(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+
+class RemoveCourseButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Remove Course"
+        self.style = discord.ButtonStyle.red
+        self.custom_id = "remove_course"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
             return await interaction.response.edit_message(embed=embed, view=None)
