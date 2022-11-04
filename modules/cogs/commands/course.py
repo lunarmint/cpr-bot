@@ -27,7 +27,12 @@ class CourseCog(commands.GroupCog, group_name="course"):
         result = collection.find_one(query)
 
         create_course_button = CreateCourseButton()
+        edit_course_button = EditCourseButton()
+        remove_course_button = RemoveCourseButton()
+        
         if result is None:
+            edit_course_button.disabled = True
+            remove_course_button.disabled = True
             embed = embeds.make_embed(
                 ctx=interaction,
                 author=True,
@@ -57,8 +62,8 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
         manage_course_buttons = discord.ui.View()
         manage_course_buttons.add_item(create_course_button)
-        manage_course_buttons.add_item(EditCourseButton())
-        manage_course_buttons.add_item(RemoveCourseButton())
+        manage_course_buttons.add_item(edit_course_button)
+        manage_course_buttons.add_item(remove_course_button)
         await interaction.response.send_message(embed=embed, view=manage_course_buttons, ephemeral=True)
 
 
