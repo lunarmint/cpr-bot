@@ -29,36 +29,27 @@ class CourseCog(commands.GroupCog, group_name="course"):
         create_course_button = CreateCourseButton()
         edit_course_button = EditCourseButton()
         remove_course_button = RemoveCourseButton()
-        
-        if result is None:
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            thumbnail_url="https://i.imgur.com/NBaYHQG.png",
+            title="Course information",
+            timestamp=True,
+        )
+
+        if result:
+            embed.description = "Your current course information:"
+            embed.add_field(name="Course Name:", value=result["course_name"], inline=False)
+            embed.add_field(name="Course Abbreviation:", value=result["course_abbreviation"], inline=False)
+            embed.add_field(name="Course Section:", value=result["course_section"], inline=False)
+            embed.add_field(name="Semester:", value=result["semester"], inline=False)
+            embed.add_field(name="CRN:", value=result["crn"], inline=False)
+            create_course_button.disabled = True
+        else:
+            embed.description = "It seems that you haven't created any courses yet..."
             edit_course_button.disabled = True
             remove_course_button.disabled = True
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.blurple(),
-                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
-                title="Course information",
-                description="It seems that you haven't created any courses yet...",
-                timestamp=True,
-            )
-        else:
-            create_course_button.disabled = True
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                thumbnail_url="https://i.imgur.com/NBaYHQG.png",
-                title="Course information",
-                description="Your current course information:",
-                fields=[
-                    {"name": "Course Name:", "value": result["course_name"], "inline": False},
-                    {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
-                    {"name": "Course Section:", "value": result["course_section"], "inline": False},
-                    {"name": "Semester:", "value": result["semester"], "inline": False},
-                    {"name": "CRN:", "value": result["crn"], "inline": False},
-                ],
-                timestamp=True,
-            )
 
         manage_course_buttons = discord.ui.View()
         manage_course_buttons.add_item(create_course_button)
