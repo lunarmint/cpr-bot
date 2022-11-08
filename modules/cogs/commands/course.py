@@ -16,8 +16,8 @@ class CourseCog(commands.GroupCog, group_name="course"):
         self.bot = bot
         super().__init__()
 
-    @app_commands.command(name="manage", description="Manage your courses.")
-    async def manage_course(self, interaction: discord.Interaction) -> None:
+    @staticmethod
+    async def main_view(interaction: discord.Interaction):
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -55,6 +55,12 @@ class CourseCog(commands.GroupCog, group_name="course"):
         manage_course_buttons.add_item(create_course_button)
         manage_course_buttons.add_item(edit_course_button)
         manage_course_buttons.add_item(remove_course_button)
+
+        return embed, manage_course_buttons
+
+    @app_commands.command(name="manage", description="Manage your courses.")
+    async def manage_course(self, interaction: discord.Interaction) -> None:
+        embed, manage_course_buttons = await self.main_view(interaction)
         await interaction.response.send_message(embed=embed, view=manage_course_buttons, ephemeral=True)
 
 
@@ -127,6 +133,18 @@ class RemoveCourseButton(discord.ui.Button):
             ],
         )
         await interaction.response.edit_message(embed=embed, view=ConfirmButtons())
+
+
+class BackButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Back"
+        self.style = discord.ButtonStyle.gray
+        self.custom_id = "course_back"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed, manage_course_buttons = await CourseCog.main_view(interaction)
+        await interaction.response.edit_message(embed=embed, view=manage_course_buttons)
 
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
@@ -203,7 +221,10 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             ],
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
@@ -215,7 +236,10 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             footer="Contact Mint#0504 if you wish to report the bug.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
 
 class EditCourseModal(discord.ui.Modal, title="Edit Course"):
@@ -300,7 +324,10 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             ],
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
@@ -312,7 +339,10 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             footer="Contact Mint#0504 if you wish to report the bug.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
 
 class ConfirmButtons(discord.ui.View):
@@ -333,7 +363,10 @@ class ConfirmButtons(discord.ui.View):
             description="Course was successfully deleted.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="course_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -346,7 +379,10 @@ class ConfirmButtons(discord.ui.View):
             description="Your course removal request was canceled.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        back_button = discord.ui.View()
+        back_button.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=back_button)
 
 
 async def setup(bot: commands.Bot) -> None:
