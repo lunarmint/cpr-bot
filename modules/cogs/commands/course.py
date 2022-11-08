@@ -135,18 +135,6 @@ class RemoveCourseButton(discord.ui.Button):
         await interaction.response.edit_message(embed=embed, view=ConfirmButtons())
 
 
-class BackButton(discord.ui.Button):
-    def __init__(self) -> None:
-        super().__init__()
-        self.label = "Back"
-        self.style = discord.ButtonStyle.gray
-        self.custom_id = "course_back"
-
-    async def callback(self, interaction: discord.Interaction) -> None:
-        embed, manage_course_buttons = await CourseCog.main_view(interaction)
-        await interaction.response.edit_message(embed=embed, view=manage_course_buttons)
-
-
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
     def __init__(self) -> None:
         super().__init__(timeout=None)
@@ -383,6 +371,18 @@ class ConfirmButtons(discord.ui.View):
         back_button = discord.ui.View()
         back_button.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=back_button)
+
+
+class BackButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Go Back"
+        self.style = discord.ButtonStyle.gray
+        self.custom_id = "course_back"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed, manage_course_buttons = await CourseCog.main_view(interaction)
+        await interaction.response.edit_message(embed=embed, view=manage_course_buttons)
 
 
 async def setup(bot: commands.Bot) -> None:
