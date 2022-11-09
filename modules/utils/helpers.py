@@ -171,9 +171,9 @@ async def get_command(
             return value
 
         for option in value.options:
-            if option.name == subcommand_group and subcommand is None:
+            if value.name == command and option.name == subcommand_group and subcommand is None:
                 return option
 
             for item in option.options:
-                if item.name == subcommand:
+                if value.name == command and option.name == subcommand_group and item.name == subcommand:
                     return item
