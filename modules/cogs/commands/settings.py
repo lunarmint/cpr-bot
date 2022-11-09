@@ -260,7 +260,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("cooldown")
-        query = {"command": self.command}
+        query = {"guild_id": interaction.guild_id, "command": self.command}
         rate = int(self.rate.value)
         per = int(self.per.value)
 
