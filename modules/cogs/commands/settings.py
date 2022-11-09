@@ -109,7 +109,8 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         )
         cooldown_results = cooldown_collection.find(cooldown_query)
         options = [discord.SelectOption(label=result["command"]) for result in cooldown_results]
-        cooldown_dropdown = CooldownDropdownView(options)
+        cooldown_dropdown = discord.ui.View()
+        cooldown_dropdown.add_item(CooldownDropdown(options))
         await interaction.response.send_message(embed=embed, view=cooldown_dropdown, ephemeral=True)
 
     team = app_commands.Group(name="team", description="Set team size limit.")
@@ -213,12 +214,6 @@ class TeamSizeConfirmButtons(discord.ui.View):
             description="Your team size limit update request was canceled.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
-
-
-class CooldownDropdownView(discord.ui.View):
-    def __init__(self, options: list) -> None:
-        super().__init__(timeout=None)
-        self.add_item(CooldownDropdown(options))
 
 
 class CooldownDropdown(discord.ui.Select):
