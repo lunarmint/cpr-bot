@@ -17,7 +17,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
         super().__init__()
 
     @staticmethod
-    async def main_view(interaction: discord.Interaction):
+    async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         result = collection.find_one(query)
