@@ -19,7 +19,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
     @staticmethod
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
@@ -89,7 +89,7 @@ class EditCourseButton(discord.ui.Button):
             return await interaction.response.edit_message(embed=embed, view=None)
 
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         result = collection.find_one(query)
 
         edit_course_modal = EditCourseModal(
@@ -115,7 +115,7 @@ class RemoveCourseButton(discord.ui.Button):
             return await interaction.response.edit_message(embed=embed, view=None)
 
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
@@ -184,7 +184,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("courses")
         document = {
-            "guild_id": interaction.guild.id,
+            "guild_id": interaction.guild_id,
             "user_id": interaction.user.id,
             "course_name": self.course_name.value,
             "course_abbreviation": self.course_abbreviation.value,
@@ -285,7 +285,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         new_value = {
             "$set": {
                 "course_name": self.course_name.value,
@@ -341,7 +341,7 @@ class ConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="course_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("courses")
-        query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+        query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         collection.delete_one(query)
         embed = embeds.make_embed(
             ctx=interaction,

@@ -38,7 +38,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
 
 async def course_check(interaction: discord.Interaction) -> discord.Embed | None:
     collection = database.Database().get_collection("courses")
-    query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
+    query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
     result = collection.find_one(query)
     if result is None:
         return embeds.make_embed(
