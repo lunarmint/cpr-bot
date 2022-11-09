@@ -226,9 +226,9 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class EditCourseModal(discord.ui.Modal, title="Edit Course"):

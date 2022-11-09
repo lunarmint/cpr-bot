@@ -109,9 +109,9 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         )
         cooldown_results = cooldown_collection.find(cooldown_query)
         options = [discord.SelectOption(label=result["command"]) for result in cooldown_results]
-        cooldown_dropdown = discord.ui.View()
-        cooldown_dropdown.add_item(CooldownDropdown(options))
-        await interaction.response.send_message(embed=embed, view=cooldown_dropdown, ephemeral=True)
+        view = discord.ui.View()
+        view.add_item(CooldownDropdown(options))
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     team = app_commands.Group(name="team", description="Set team size limit.")
 
