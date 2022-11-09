@@ -18,17 +18,9 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
     @staticmethod
     async def main_view(interaction: discord.Interaction):
-        embed = await helpers.instructor_check(interaction)
-        if isinstance(embed, discord.Embed):
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
-
         collection = database.Database().get_collection("courses")
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild.id}
         result = collection.find_one(query)
-
-        create_course_button = CreateCourseButton()
-        edit_course_button = EditCourseButton()
-        remove_course_button = RemoveCourseButton()
 
         embed = embeds.make_embed(
             ctx=interaction,
@@ -37,6 +29,10 @@ class CourseCog(commands.GroupCog, group_name="course"):
             title="Course information",
             timestamp=True,
         )
+
+        create_course_button = CreateCourseButton()
+        edit_course_button = EditCourseButton()
+        remove_course_button = RemoveCourseButton()
 
         if result:
             embed.description = "Your current course information:"
@@ -58,9 +54,14 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
         return embed, manage_course_buttons
 
-    @app_commands.command(name="manage", description="Manage your courses.")
-    async def manage_course(self, interaction: discord.Interaction) -> None:
+    @app_commands.command(name="view", description="View your current course.")
+    async def view(self, interaction: discord.Interaction) -> None:
         embed, manage_course_buttons = await self.main_view(interaction)
+
+        check = await helpers.instructor_check(interaction)
+        if isinstance(check, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
         await interaction.response.send_message(embed=embed, view=manage_course_buttons, ephemeral=True)
 
 
