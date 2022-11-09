@@ -211,9 +211,9 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
@@ -314,9 +314,9 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
         log.error(error)
@@ -329,9 +329,9 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class ConfirmButtons(discord.ui.View):
@@ -353,9 +353,9 @@ class ConfirmButtons(discord.ui.View):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="course_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -369,9 +369,9 @@ class ConfirmButtons(discord.ui.View):
             timestamp=True,
         )
 
-        back_button = discord.ui.View()
-        back_button.add_item(BackButton())
-        await interaction.response.edit_message(embed=embed, view=back_button)
+        view = discord.ui.View()
+        view.add_item(BackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class BackButton(discord.ui.Button):
