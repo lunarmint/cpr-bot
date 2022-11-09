@@ -240,7 +240,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         self.command = command
         self.rate = discord.ui.TextInput(
             label="Rate:",
-            placeholder="Number of times the command can be used before triggering a cooldown.",
+            placeholder="Number of times the command can be used.",
             default=str(rate),
             required=True,
             max_length=1024,
@@ -248,7 +248,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         )
         self.per = discord.ui.TextInput(
             label="Per:",
-            placeholder="The amount of seconds to wait for a cooldown when it’s been triggered.",
+            placeholder="The amount of seconds to wait for a cooldown.",
             default=str(per),
             required=True,
             max_length=1024,
