@@ -3,7 +3,6 @@ import logging
 import arrow
 import discord
 from discord.app_commands import AppCommand, AppCommandGroup
-from discord.ext import commands
 
 from modules import database
 from modules.utils import embeds
@@ -22,13 +21,11 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
-        description="You do not have permission to run this command.",
     )
 
     if result is None:
-        embed.description = (
-            "No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission."
-        )
+        role_command = await get_command(interaction=interaction, command="settings", subcommand_group="role")
+        embed.description = f"Use {role_command.mention} first to assign a role with the instructor permission."
         return embed
 
     if not any(role.id == result["role_id"] for role in interaction.user.roles):
@@ -163,8 +160,9 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
 
 
 async def get_command(
-    app_commands: list[AppCommand], command: str, subcommand_group: str = None, subcommand: str = None
+    interaction: discord.Interaction, command: str, subcommand_group: str = None, subcommand: str = None
 ) -> AppCommand | AppCommandGroup:
+    app_commands = await interaction.client.tree.fetch_commands()
     for index, value in enumerate(app_commands):
         if value.name == command and subcommand_group is None:
             return value

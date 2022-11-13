@@ -41,27 +41,23 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
         result = collection.find_one(query)
+
+        embed = embeds.make_embed(
+            ctx=interaction,
+            author=True,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+        )
         if result:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.yellow(),
-                thumbnail_url="https://i.imgur.com/s1sRlvc.png",
-                title="Role already assigned",
-                description=(
-                    f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
-                    f"Do you wish to update it to {role.mention}?"
-                ),
+            embed.title = "Role already assigned"
+            embed.description = (
+                f"The instructor permission is currently being assigned to the role <@&{result['role_id']}>. "
+                f"Do you wish to update it to {role.mention}?"
             )
         else:
-            embed = embeds.make_embed(
-                ctx=interaction,
-                author=True,
-                color=discord.Color.yellow(),
-                thumbnail_url="https://i.imgur.com/s1sRlvc.png",
-                title="Role update",
-                description=f"Are you sure you want to assign instructor permission to the role {role.mention}?",
-            )
+            embed.title = "Role update"
+            embed.description = f"Are you sure you want to assign instructor permission to the role {role.mention}?"
+
         await interaction.response.send_message(embed=embed, view=RoleConfirmButtons(role, result), ephemeral=True)
 
     @role.error
