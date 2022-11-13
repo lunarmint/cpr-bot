@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 class SettingsCog(commands.GroupCog, group_name="settings"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        super().__init__()
 
     @app_commands.command(name="help", description="Instructions on how to setup the bot.")
     async def help(self, interaction: discord.Interaction) -> None:

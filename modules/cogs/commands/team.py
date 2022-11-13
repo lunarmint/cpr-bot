@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 class TeamCog(commands.GroupCog, group_name="team"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        super().__init__()
 
     @app_commands.command(name="create", description="Create a new team.")
     async def create(self, interaction: discord.Interaction, name: str) -> None:

@@ -14,7 +14,6 @@ log = logging.getLogger(__name__)
 class CourseCog(commands.GroupCog, group_name="course"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        super().__init__()
 
     @staticmethod
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
