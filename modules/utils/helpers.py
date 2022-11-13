@@ -22,7 +22,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
-        footer="Please contact your instructor or server owner if you are not one.",
+        description="You do not have permission to run this command.",
     )
 
     if result is None:
@@ -122,7 +122,7 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/40eDcIB.png",
             title="Error",
-            description=f"Your team name update request is on cooldown. Please try again in:\n\n {duration_string}.",
+            description=f"Command is on cooldown. Please try again in:\n\n {duration_string}.",
         )
 
 
@@ -163,10 +163,9 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
 
 
 async def get_command(
-    bot: commands.Bot, command: str, subcommand_group: str = None, subcommand: str = None
+    app_commands: list[AppCommand], command: str, subcommand_group: str = None, subcommand: str = None
 ) -> AppCommand | AppCommandGroup:
-    commands_list = await bot.tree.fetch_commands()
-    for index, value in enumerate(commands_list):
+    for index, value in enumerate(app_commands):
         if value.name == command and subcommand_group is None:
             return value
 
