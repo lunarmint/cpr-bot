@@ -5,7 +5,7 @@ from typing import Any, Mapping
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
-from config import config
+from modules.utils.config import config
 
 log = logging.getLogger(__name__)
 

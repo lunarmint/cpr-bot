@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 import __init__  # noqa
-from config import config
+from modules.utils.config import config
 
 bot = commands.Bot(
     activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"]),

@@ -3,7 +3,7 @@ import logging
 import arrow
 from discord.ext import commands, tasks
 
-from modules import database
+from modules.utils import database
 
 log = logging.getLogger(__name__)
 

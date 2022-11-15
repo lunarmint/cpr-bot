@@ -10,8 +10,7 @@ from discord import app_commands
 from discord.ext import commands
 from requests_toolbelt import MultipartEncoder
 
-from modules import database
-from modules.utils import embeds, helpers
+from modules.utils import database, embeds, helpers
 
 log = logging.getLogger(__name__)
 

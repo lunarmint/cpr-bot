@@ -4,8 +4,7 @@ import arrow
 import discord
 from discord.app_commands import AppCommand, AppCommandGroup
 
-from modules import database
-from modules.utils import embeds
+from modules.utils import database, embeds
 
 log = logging.getLogger(__name__)
 
