@@ -26,7 +26,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         )
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/NBaYHQG.png",
             title="Help",
@@ -43,7 +42,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
         )
@@ -65,7 +63,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -95,7 +92,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/PyLyqio.png",
             title="Command cooldown",
@@ -121,7 +117,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Team size update",
@@ -154,7 +149,6 @@ class RoleConfirmButtons(discord.ui.View):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Role updated",
@@ -166,7 +160,6 @@ class RoleConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -189,7 +182,6 @@ class TeamSizeConfirmButtons(discord.ui.View):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Team size updated",
@@ -201,7 +193,6 @@ class TeamSizeConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -261,7 +252,6 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         if rate <= 0 or per <= 0:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/40eDcIB.png",
                 title="Invalid input",
@@ -275,7 +265,6 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         seconds = "seconds" if per > 1 else "second"
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Command cooldown updated",

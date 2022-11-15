@@ -16,7 +16,6 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
 
     embed = embeds.make_embed(
         interaction=interaction,
-        author=True,
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
@@ -39,7 +38,6 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | None
     if result is None:
         return embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
@@ -54,7 +52,6 @@ async def role_availability_check(interaction: discord.Interaction) -> discord.E
     if result is None:
         return embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
@@ -74,7 +71,6 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
     if result is None:
         return embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
@@ -85,7 +81,6 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
     if result["teams_locked"]:
         return embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/TwBPBrs.png",
             title="Error",
@@ -114,7 +109,6 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
         duration_string = future.humanize(present, only_distance=True, granularity=["hour", "minute", "second"])
         return embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/40eDcIB.png",
             title="Error",

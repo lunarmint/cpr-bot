@@ -23,7 +23,6 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Assignments",
             timestamp=True,
@@ -77,7 +76,6 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         if result is None:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -94,7 +92,6 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Attachment uploaded",
@@ -145,7 +142,6 @@ class AssignmentDropdown(discord.ui.Select):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Assignments",
             description="Use the dropdown below to select an assignment.",
@@ -222,7 +218,6 @@ class RemoveAssignmentButton(discord.ui.Button):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
@@ -253,7 +248,6 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
         collection.delete_one(query)
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -269,7 +263,6 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -337,7 +330,6 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         if result:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -353,7 +345,6 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         if points < 0:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -377,7 +368,6 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         except ValueError:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -408,7 +398,6 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Assignment created",
@@ -493,7 +482,6 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         if points < 0:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -517,7 +505,6 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         except ValueError:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -549,7 +536,6 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Assignment updated",

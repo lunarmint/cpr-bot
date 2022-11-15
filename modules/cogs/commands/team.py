@@ -31,7 +31,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if team_result:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -45,7 +44,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
             if interaction.user.id in document["members"]:
                 embed = embeds.make_embed(
                     interaction=interaction,
-                    author=True,
                     color=discord.Color.red(),
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                     title="Error",
@@ -56,7 +54,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Create team",
@@ -85,7 +82,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if len(new_team_result["members"]) >= settings_result["team_size"]:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -97,7 +93,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if new_team_result is None:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -112,7 +107,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if current_team_result and current_team_result["name"] == new_team_result["name"]:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -123,7 +117,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
@@ -160,7 +153,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if team_result is None:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -171,7 +163,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
@@ -203,7 +194,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Team list",
             footer="Your current team will be marked in bold.",
@@ -255,7 +245,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if team_result is None:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
@@ -266,7 +255,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
@@ -295,7 +283,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if settings_result["teams_locked"]:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/TwBPBrs.png",
                 title="Error",
@@ -306,7 +293,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/C3gWtnj.png",
             title="Warning",
@@ -334,7 +320,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if not settings_result["teams_locked"]:
             embed = embeds.make_embed(
                 interaction=interaction,
-                author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/OidhOOU.png",
                 title="Error",
@@ -345,7 +330,6 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/HVA4eCw.png",
             title="Warning",
@@ -397,7 +381,6 @@ class CreateTeamConfirmButtons(discord.ui.View):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -410,7 +393,6 @@ class CreateTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -446,7 +428,6 @@ class JoinTeamConfirmButtons(discord.ui.View):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -459,7 +440,6 @@ class JoinTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -487,7 +467,6 @@ class LeaveTeamConfirmButtons(discord.ui.View):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -500,7 +479,6 @@ class LeaveTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -523,7 +501,6 @@ class RenameTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -573,7 +550,6 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Team renamed",
@@ -612,7 +588,6 @@ class LockTeamConfirmButtons(discord.ui.View):
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/6620Buy.png",
             title="Teams locked",
@@ -625,7 +600,6 @@ class LockTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
@@ -653,7 +627,6 @@ class UnlockTeamConfirmButtons(discord.ui.View):
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/OaGi4Xz.png",
             title="Teams unlocked",
@@ -666,7 +639,6 @@ class UnlockTeamConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",

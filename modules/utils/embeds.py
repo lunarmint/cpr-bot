@@ -7,7 +7,6 @@ from discord.ext import commands
 def make_embed(
     ctx: commands.Context = None,
     interaction: discord.Interaction = None,
-    author: bool = None,
     color: int | discord.colour.Colour = None,
     title: str = None,
     description: str = None,
@@ -25,10 +24,10 @@ def make_embed(
     """
     embed = discord.Embed()
 
-    if ctx and author:
-            embed.set_author(icon_url=ctx.author.display_avatar, name=ctx.author.name)
+    if ctx:
+        embed.set_author(icon_url=ctx.author.display_avatar, name=ctx.author.name)
 
-    if interaction and author:
+    if interaction:
         embed.set_author(icon_url=interaction.user.display_avatar, name=interaction.user.name)
 
     if isinstance(color, int | discord.colour.Colour):

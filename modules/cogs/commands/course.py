@@ -21,7 +21,6 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             thumbnail_url="https://i.imgur.com/NBaYHQG.png",
             title="Course information",
             timestamp=True,
@@ -117,7 +116,6 @@ class RemoveCourseButton(discord.ui.Button):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
             title="Warning",
@@ -193,7 +191,6 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Course created",
@@ -296,7 +293,6 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Course updated",
@@ -342,7 +338,6 @@ class ConfirmButtons(discord.ui.View):
         collection.delete_one(query)
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -358,7 +353,6 @@ class ConfirmButtons(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
-            author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
