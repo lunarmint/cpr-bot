@@ -26,7 +26,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             "5. Use the command `/team add` to add a student to a team, either by name or by ID."
         )
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/NBaYHQG.png",
@@ -43,7 +43,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -65,7 +65,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -95,7 +95,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
                 cooldown_collection.insert_one(document)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/PyLyqio.png",
@@ -121,7 +121,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -154,7 +154,7 @@ class RoleConfirmButtons(discord.ui.View):
             collection.insert_one(document)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -166,7 +166,7 @@ class RoleConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="role_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -189,7 +189,7 @@ class TeamSizeConfirmButtons(discord.ui.View):
         collection.update_one(query, new_value)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -201,7 +201,7 @@ class TeamSizeConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="team_size_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -261,7 +261,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
 
         if rate <= 0 or per <= 0:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/40eDcIB.png",
@@ -275,7 +275,7 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
 
         seconds = "seconds" if per > 1 else "second"
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",

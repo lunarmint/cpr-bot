@@ -23,7 +23,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         """
         synced = await self.bot.tree.sync()
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -40,7 +40,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         """
         synced = await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -59,7 +59,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         self.bot.tree.copy_global_to(guild=interaction.guild)
         synced = await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -74,7 +74,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         self.bot.tree.clear_commands(guild=interaction.guild)
         await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
@@ -91,7 +91,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",

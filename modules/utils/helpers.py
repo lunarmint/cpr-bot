@@ -16,7 +16,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
     result = collection.find_one(query)
 
     embed = embeds.make_embed(
-        ctx=interaction,
+        interaction=interaction,
         author=True,
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -39,7 +39,7 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | None
     result = collection.find_one(query)
     if result is None:
         return embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -54,7 +54,7 @@ async def role_availability_check(interaction: discord.Interaction) -> discord.E
     result = collection.find_one(query)
     if result is None:
         return embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -74,7 +74,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
 
     if result is None:
         return embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -85,7 +85,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
 
     if result["teams_locked"]:
         return embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/TwBPBrs.png",
@@ -114,7 +114,7 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
         future = present.shift(seconds=task_result["ready_on"] - present.timestamp())
         duration_string = future.humanize(present, only_distance=True, granularity=["hour", "minute", "second"])
         return embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.red(),
             thumbnail_url="https://i.imgur.com/40eDcIB.png",

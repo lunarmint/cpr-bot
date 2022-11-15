@@ -22,7 +22,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/NBaYHQG.png",
             title="Course information",
@@ -118,7 +118,7 @@ class RemoveCourseButton(discord.ui.Button):
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -194,7 +194,7 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
         collection.insert_one(document)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -297,7 +297,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
         collection.update_one(query, new_value)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -343,7 +343,7 @@ class ConfirmButtons(discord.ui.View):
         query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
         collection.delete_one(query)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -359,7 +359,7 @@ class ConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="course_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",

@@ -31,7 +31,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         team_result = team_collection.find_one(team_query)
         if team_result:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -45,7 +45,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         for document in cursor:
             if interaction.user.id in document["members"]:
                 embed = embeds.make_embed(
-                    ctx=interaction,
+                    interaction=interaction,
                     author=True,
                     color=discord.Color.red(),
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -56,7 +56,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -85,7 +85,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         if len(new_team_result["members"]) >= settings_result["team_size"]:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -97,7 +97,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         if new_team_result is None:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -112,7 +112,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         if current_team_result and current_team_result["name"] == new_team_result["name"]:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -123,7 +123,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -160,7 +160,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         if team_result is None:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -171,7 +171,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -203,7 +203,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         team_result = team_collection.find(team_query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Team list",
@@ -255,7 +255,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         team_result = team_collection.find_one(team_query)
         if team_result is None:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -266,7 +266,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -295,7 +295,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         settings_result = settings_collection.find_one(settings_query)
         if settings_result["teams_locked"]:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/TwBPBrs.png",
@@ -306,7 +306,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/C3gWtnj.png",
@@ -334,7 +334,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         settings_result = settings_collection.find_one(settings_query)
         if not settings_result["teams_locked"]:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/OidhOOU.png",
@@ -345,7 +345,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/HVA4eCw.png",
@@ -397,7 +397,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
         team_collection.insert_one(team_document)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -410,7 +410,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="create_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -446,7 +446,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
         collection.update_one(new_team_query, new_team_value)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -459,7 +459,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="join_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -487,7 +487,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         await channel.set_permissions(interaction.user, overwrite=None)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -500,7 +500,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="leave_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -523,7 +523,7 @@ class RenameTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="rename_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -573,7 +573,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
         await helpers.set_cooldown(interaction=interaction, command="team rename")
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -612,7 +612,7 @@ class LockTeamConfirmButtons(discord.ui.View):
         team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/6620Buy.png",
@@ -625,7 +625,7 @@ class LockTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="lock_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -653,7 +653,7 @@ class UnlockTeamConfirmButtons(discord.ui.View):
         team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/OaGi4Xz.png",
@@ -666,7 +666,7 @@ class UnlockTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="unlock_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",

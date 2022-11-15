@@ -23,7 +23,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
     @staticmethod
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Assignments",
@@ -77,7 +77,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
         if result is None:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -94,7 +94,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         await attachment.save(file_path)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -145,7 +145,7 @@ class AssignmentDropdown(discord.ui.Select):
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Assignments",
@@ -222,7 +222,7 @@ class RemoveAssignmentButton(discord.ui.Button):
         result = collection.find_one(query)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/s1sRlvc.png",
@@ -253,7 +253,7 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
         query = {"guild_id": interaction.guild_id, "name": self.name}
         collection.delete_one(query)
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -269,7 +269,7 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="assignment_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
@@ -337,7 +337,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         result = collection.find_one(query)
         if result:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -353,7 +353,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         points = int(self.points.value)
         if points < 0:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -377,7 +377,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
             )
         except ValueError:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -408,7 +408,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         upload_command = await helpers.get_command(interaction=interaction, command="assignment", subcommand_group="upload")
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
@@ -493,7 +493,7 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         points = int(self.points.value)
         if points < 0:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -517,7 +517,7 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
             )
         except ValueError:
             embed = embeds.make_embed(
-                ctx=interaction,
+                interaction=interaction,
                 author=True,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
@@ -549,7 +549,7 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         collection.update_one(query, new_value)
 
         embed = embeds.make_embed(
-            ctx=interaction,
+            interaction=interaction,
             author=True,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
