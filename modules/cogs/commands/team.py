@@ -37,6 +37,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description="A team with this name already exists.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -50,6 +51,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                     title="Error",
                     description="You cannot create a new team because you are already in a team.",
+                    timestamp=True,
                 )
                 return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -89,6 +91,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description=f"The team '{new_team_result['name']}' is already full.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -100,6 +103,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description="The specified team name does not exist.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -114,6 +118,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description="Cannot join a team that you are already in.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -161,6 +166,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description="Cannot leave team because you are not in any teams yet.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -199,10 +205,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
         embed = embeds.make_embed(
             ctx=interaction,
             author=True,
-            color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
             title="Team list",
             footer="Your current team will be marked in bold.",
+            timestamp=True,
         )
 
         if team_result is None:
@@ -255,6 +261,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description="Cannot update team name because you are not in any teams yet.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -294,6 +301,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/TwBPBrs.png",
                 title="Error",
                 description="Cannot lock teams because all teams are already locked.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -332,6 +340,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 thumbnail_url="https://i.imgur.com/OidhOOU.png",
                 title="Error",
                 description="Cannot unlock teams because all teams are already unlocked.",
+                timestamp=True,
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -394,6 +403,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
             description=f"Team '{self.name}' was successfully created.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -406,6 +416,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team creation request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -441,6 +452,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
             description=f"You were successfully added to the team '{self.new_team['name']}'.",
+            timestamp=True,
         )
         return await interaction.response.edit_message(embed=embed, view=None)
 
@@ -453,6 +465,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team join request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -480,6 +493,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
             description=f"You were successfully removed from the team '{self.name}'.",
+            timestamp=True,
         )
         return await interaction.response.edit_message(embed=embed, view=None)
 
@@ -491,7 +505,8 @@ class LeaveTeamConfirmButtons(discord.ui.View):
             color=discord.Color.blurple(),
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
-            description="Your team leaving request was canceled.",
+            description="Your team leave request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -514,6 +529,7 @@ class RenameTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team rename request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -563,6 +579,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Team renamed",
             description=f"Successfully updated your team name from '{self.name}' to '{new_name}'.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -573,6 +590,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             thumbnail_url="https://i.imgur.com/M1WQDzo.png",
             title="Error",
             description="Oops! Something went wrong. Please try again later!",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, ephemeral=True)
 
@@ -600,6 +618,7 @@ class LockTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/6620Buy.png",
             title="Teams locked",
             description=f"Successfully locked the following teams:\n\n{team_names}",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -612,6 +631,7 @@ class LockTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team lock request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -639,6 +659,7 @@ class UnlockTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/OaGi4Xz.png",
             title="Teams unlocked",
             description=f"Successfully unlocked the following teams:\n\n{team_names}",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
@@ -651,6 +672,7 @@ class UnlockTeamConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team unlock request was canceled.",
+            timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
