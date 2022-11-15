@@ -65,6 +65,10 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
     @app_commands.command(name="upload", description="Upload an attachment for an assignment.")
     async def upload(self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment):
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
         await interaction.response.defer(ephemeral=True)
 
         collection = database.Database().get_collection("assignments")
