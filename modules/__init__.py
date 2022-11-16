@@ -17,7 +17,7 @@ format_string = "%(asctime)s | %(name)s | %(levelname)s | %(message)s"
 log_format = logging.Formatter(format_string)
 
 # Make a Log directory and file
-log_file = Path("logs", "bot.log")
+log_file = Path().cwd().joinpath("logs", "bot.log")
 log_file.parent.mkdir(exist_ok=True)
 file_handler = handlers.RotatingFileHandler(log_file, maxBytes=5242880, backupCount=7, encoding="utf8")
 file_handler.setFormatter(log_format)
