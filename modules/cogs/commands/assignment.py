@@ -84,7 +84,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
             )
             return await interaction.followup.send(embed=embed)
 
-        file_dir = pathlib.Path(__file__).parents[3].joinpath("assignments", str(interaction.guild_id), assignment)
+        file_dir = pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
         file_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = file_dir.joinpath(attachment.filename)
@@ -117,7 +117,7 @@ class AssignmentDropdown(discord.ui.Select):
 
         def get_hyperlinks() -> list[str]:
             root = pathlib.Path(__file__).parents[3]
-            file_dir = root.joinpath("assignments", str(interaction.guild_id), result["name"]).glob("**/*")
+            file_dir = root.joinpath("uploads", str(interaction.guild_id), "assignments", result["name"]).glob("**/*")
             hyperlinks = []
             for item in file_dir:
                 if item.is_file():
