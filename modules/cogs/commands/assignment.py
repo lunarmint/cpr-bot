@@ -24,7 +24,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         embed = embeds.make_embed(
             interaction=interaction,
-            thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
+            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
             title="Assignments",
             timestamp=True,
         )
