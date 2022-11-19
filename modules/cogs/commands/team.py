@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Any
+from typing import Mapping, Any, List
 
 import discord
 from discord import app_commands
@@ -135,6 +135,22 @@ class TeamCog(commands.GroupCog, group_name="team"):
             view=JoinTeamConfirmButtons(current_team=current_team_result, new_team=new_team_result),
             ephemeral=True,
         )
+
+    @join.autocomplete("team")
+    async def join_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        settings_collection = database.Database().get_collection("settings")
+        settings_query = {"guild_id": interaction.guild_id}
+        settings_result = settings_collection.find_one(settings_query)
+
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"guild_id": interaction.guild_id}
+        team_results = [
+            result["name"]
+            for result in team_collection.find(team_query)
+            if len(result["members"]) < settings_result["team_size"]
+        ]
+
+        return [app_commands.Choice(name=team, value=team) for team in team_results if current.lower() in team.lower()]
 
     @app_commands.command(name="leave", description="Leave the current team.")
     async def leave(self, interaction: discord.Interaction) -> None:
