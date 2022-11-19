@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import pathlib
+from typing import List
 
 import arrow
 import discord
@@ -85,7 +86,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
             )
             return await interaction.followup.send(embed=embed)
 
-        file_dir = pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
+        file_dir = (
+            pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
+        )
         file_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = file_dir.joinpath(attachment.filename)
@@ -101,6 +104,17 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         )
 
         await interaction.edit_original_response(embed=embed)
+
+    @upload.autocomplete("assignment")
+    async def upload_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        collection = database.Database().get_collection("assignments")
+        query = {"guild_id": interaction.guild_id}
+        assignments = [result["name"] for result in collection.find(query).sort("name")]
+        return [
+            app_commands.Choice(name=assignment, value=assignment)
+            for assignment in assignments
+            if current.lower() in assignment.lower()
+        ]
 
 
 class AssignmentDropdown(discord.ui.Select):
