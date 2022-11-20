@@ -262,13 +262,21 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         new_value = {"$set": {"rate": rate, "per": per}}
         collection.update_one(query, new_value)
 
+        command_tokens = self.command.split()
+        command = await helpers.get_command(
+            interaction=interaction,
+            command=command_tokens[0] if command_tokens else None,
+            subcommand_group=command_tokens[1] if len(command_tokens) > 1 else None,
+            subcommand=command_tokens[2] if len(command_tokens) > 2 else None,
+        )
+
         seconds = "seconds" if per > 1 else "second"
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Command cooldown updated",
-            description=f"Successfully updated `/{self.command}` command's rate to {rate} per {per} {seconds}.",
+            description=f"Successfully updated {command.mention} command's rate to {rate} per {per} {seconds}.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
