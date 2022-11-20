@@ -558,10 +558,11 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Assignment updated",
-            description=f"Successfully updated {self.name.value.lower()}:",
+            description="Successfully updated an assignment:",
             fields=[
                 {"name": "Assignment Name:", "value": self.name.value, "inline": False},
                 {"name": "Points Possible:", "value": self.points.value, "inline": False},
+                {"name": "Due Date:", "value": f"{time.format('MM/DD/YYYY, hh:mmA')} ({time.tzname()})", "inline": False},
                 {"name": "Instructions:", "value": self.instructions.value, "inline": False},
             ],
             timestamp=True,
