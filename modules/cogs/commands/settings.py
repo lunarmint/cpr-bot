@@ -124,6 +124,27 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
         )
         await interaction.response.send_message(embed=embed, view=TeamSizeConfirmButtons(size), ephemeral=True)
 
+    peer_review = app_commands.Group(name="peer", description="Peer review settings.")
+
+    @peer_review.command(name="review", description="Set peer review size per team.")
+    async def peer_review_size(self, interaction: discord.Interaction, size: int):
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        collection = database.Database().get_collection("settings")
+        query = {"guild_id": interaction.guild_id}
+        result = collection.find_one(query)
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Team size update",
+            description=f"Update the peer review size per team from **{result['peer_review_size']}** to **{size}**?",
+        )
+        await interaction.response.send_message(embed=embed, view=PeerReviewSizeConfirmButtons(size), ephemeral=True)
+
 
 class RoleConfirmButtons(discord.ui.View):
     def __init__(self, role: discord.Role, result: Mapping[str, Any]) -> None:
@@ -142,7 +163,8 @@ class RoleConfirmButtons(discord.ui.View):
             document = {
                 "guild_id": interaction.guild_id,
                 "role_id": self.role.id,
-                "team_size": 3,
+                "team_size": 1,
+                "peer_review_size": 1,
                 "teams_locked": False,
             }
             collection.insert_one(document)
@@ -197,6 +219,39 @@ class TeamSizeConfirmButtons(discord.ui.View):
             thumbnail_url="https://i.imgur.com/QQiSpLF.png",
             title="Action cancelled",
             description="Your team size limit update request was canceled.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+
+class PeerReviewSizeConfirmButtons(discord.ui.View):
+    def __init__(self, size: int) -> None:
+        super().__init__(timeout=None)
+        self.size = size
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="peer_review_size_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("settings")
+        query = {"guild_id": interaction.guild_id}
+        new_value = {"$set": {"peer_review_size": self.size}}
+        collection.update_one(query, new_value)
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Peer review size updated",
+            description=f"Peer review size has been updated to {self.size}.",
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="peer_review_size_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your peer review size update request was canceled.",
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
