@@ -69,7 +69,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         await interaction.response.defer(ephemeral=True)
-        await interaction.edit_original_response(embed=embeds.make_embed(description="*Uploading...*"))
+        await interaction.edit_original_response(
+            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
+        )
 
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name_lowercase": assignment.lower()}
@@ -124,7 +126,9 @@ class AssignmentDropdown(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
-        await interaction.edit_original_response(embed=embeds.make_embed(description="*Loading...*"), view=self.view)
+        await interaction.edit_original_response(
+            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=self.view
+        )
 
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.values[0]}
