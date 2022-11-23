@@ -21,6 +21,8 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         """
         Does not sync all commands globally, just the ones registered as global.
         """
+        await interaction.response.defer(ephemeral=True)
+
         synced = await self.bot.tree.sync()
         embed = embeds.make_embed(
             interaction=interaction,
@@ -29,7 +31,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
             description=f"Synced {len(synced)} commands globally.",
             color=discord.Color.green(),
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @sync.command(name="guild", description="Sync commands in the current guild.")
     @app_commands.checks.has_permissions(manage_guild=True)
@@ -37,6 +39,8 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         """
         Does not sync all of your commands to that guild, just the ones registered to that guild.
         """
+        await interaction.response.defer(ephemeral=True)
+
         synced = await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
             interaction=interaction,
@@ -45,7 +49,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
             description=f"Synced {len(synced)} commands to the current guild.",
             color=discord.Color.green(),
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @sync.command(name="copy", description="Copies all global app commands to current guild and syncs.")
     @app_commands.checks.has_permissions(manage_guild=True)
@@ -54,6 +58,8 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         This will copy the global list of commands in the tree into the list of commands for the specified guild.
         This is not permanent between bot restarts, and it doesn't impact the state of the commands (you still have to sync).
         """
+        await interaction.response.defer(ephemeral=True)
+
         self.bot.tree.copy_global_to(guild=interaction.guild)
         synced = await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
@@ -63,11 +69,13 @@ class AdminCog(commands.GroupCog, group_name="admin"):
             description=f"Copied and synced {len(synced)} global app commands to the current guild.",
             color=discord.Color.green(),
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @sync.command(name="remove", description="Clears all commands from the current guild target and syncs.")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def sync_remove(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+
         self.bot.tree.clear_commands(guild=interaction.guild)
         await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
@@ -77,7 +85,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
             description="Cleared all commands from the current guild and synced.",
             color=discord.Color.green(),
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
 
     @sync_global.error
     @sync_guild.error
