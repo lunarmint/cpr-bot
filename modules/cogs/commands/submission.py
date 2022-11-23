@@ -199,4 +199,4 @@ class SubmissionDropdown(discord.ui.Select):
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(SubmissionCog(bot))
-    log.info("Cog loaded: grade")
+    log.info("Cog loaded: submission")
