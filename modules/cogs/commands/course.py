@@ -133,7 +133,7 @@ class RemoveCourseButton(discord.ui.Button):
 
 class CreateCourseModal(discord.ui.Modal, title="Create Course"):
     def __init__(self) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.course_name = discord.ui.TextInput(
             label="Course Name:",
             placeholder="Software Engineering",
@@ -234,7 +234,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
         semester: str,
         crn: str,
     ) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.course_name = discord.ui.TextInput(
             label="Course Name:",
             default=course_name,
@@ -329,7 +329,7 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
 
 class ConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="course_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:

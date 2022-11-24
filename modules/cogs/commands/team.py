@@ -360,7 +360,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
 class CreateTeamConfirmButtons(discord.ui.View):
     def __init__(self, name: str) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.name = name
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="create_team_confirm")
@@ -420,7 +420,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
 
 class JoinTeamConfirmButtons(discord.ui.View):
     def __init__(self, current_team: Mapping[str, Any], new_team: Mapping[str, Any]) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.current_team = current_team
         self.new_team = new_team
 
@@ -467,7 +467,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
 
 class LeaveTeamConfirmButtons(discord.ui.View):
     def __init__(self, name: str, channel_id: int) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.name = name
         self.channel_id = channel_id
 
@@ -506,7 +506,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
 
 class RenameTeamConfirmButtons(discord.ui.View):
     def __init__(self, name: str) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.name = name
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="rename_team_confirm")
@@ -528,7 +528,7 @@ class RenameTeamConfirmButtons(discord.ui.View):
 
 class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
     def __init__(self, name: str) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.name = name
         self.new_name = discord.ui.TextInput(
             label="New Team Name:",
@@ -588,7 +588,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
 
 class LockTeamConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="lock_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -627,7 +627,7 @@ class LockTeamConfirmButtons(discord.ui.View):
 
 class UnlockTeamConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="unlock_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:

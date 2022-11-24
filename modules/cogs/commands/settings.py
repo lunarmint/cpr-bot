@@ -148,7 +148,7 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
 
 class RoleConfirmButtons(discord.ui.View):
     def __init__(self, role: discord.Role, result: Mapping[str, Any]) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.role = role
         self.result = result
 
@@ -192,7 +192,7 @@ class RoleConfirmButtons(discord.ui.View):
 
 class TeamSizeConfirmButtons(discord.ui.View):
     def __init__(self, size: int) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.size = size
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_size_confirm")
@@ -225,7 +225,7 @@ class TeamSizeConfirmButtons(discord.ui.View):
 
 class PeerReviewSizeConfirmButtons(discord.ui.View):
     def __init__(self, size: int) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.size = size
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="peer_review_size_confirm")

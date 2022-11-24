@@ -257,7 +257,7 @@ class RemoveAssignmentButton(discord.ui.Button):
 
 class RemoveAssignmentConfirmButtons(discord.ui.View):
     def __init__(self, name: str) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.name = name
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="assignment_confirm")
@@ -308,7 +308,7 @@ class BackButton(discord.ui.Button):
 
 class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
     def __init__(self) -> None:
-        super().__init__(timeout=None)
+        super().__init__()
         self.assignment_name = discord.ui.TextInput(
             label="Assignment Name:",
             placeholder="Assignment 1",
