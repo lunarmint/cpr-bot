@@ -130,7 +130,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         else:
             embed.description = f"You are about to join the team '{new_team_result['name']}'. Do you wish to continue?"
 
-        return await interaction.response.send_message(
+        await interaction.response.send_message(
             embed=embed,
             view=JoinTeamConfirmButtons(current_team=current_team_result, new_team=new_team_result),
             ephemeral=True,
@@ -450,7 +450,7 @@ class JoinTeamConfirmButtons(discord.ui.View):
             description=f"You were successfully added to the team '{self.new_team['name']}'.",
             timestamp=True,
         )
-        return await interaction.response.edit_message(embed=embed, view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="join_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -489,7 +489,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
             description=f"You were successfully removed from the team '{self.name}'.",
             timestamp=True,
         )
-        return await interaction.response.edit_message(embed=embed, view=None)
+        await interaction.response.edit_message(embed=embed, view=None)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="leave_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
