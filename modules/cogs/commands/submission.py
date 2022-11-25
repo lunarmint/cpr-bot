@@ -136,7 +136,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
 
 
 class SubmissionDropdown(discord.ui.Select):
-    def __init__(self, options: list) -> None:
+    def __init__(self, options: list[discord.SelectOption]) -> None:
         super().__init__()
         self.options = options
 

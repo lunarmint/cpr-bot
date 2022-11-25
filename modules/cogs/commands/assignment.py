@@ -120,7 +120,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
 
 class AssignmentDropdown(discord.ui.Select):
-    def __init__(self, options: list) -> None:
+    def __init__(self, options: list[discord.SelectOption]) -> None:
         super().__init__()
         self.options = options
 
