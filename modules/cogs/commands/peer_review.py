@@ -102,15 +102,15 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         ]
         team_options = [discord.SelectOption(label=name) for name in team_result["peer_review"]]
 
-        view = GradeView()
-        view.add_item(GradeAssignmentDropdown(assignment_options))
-        view.add_item(GradeTeamDropdown(team_options))
+        view = discord.ui.View()
+        view.add_item(GradeDropdown(options=assignment_options))
+        view.add_item(GradeDropdown(options=team_options))
 
         embed = embeds.make_embed(
             interaction=interaction,
             thumbnail_url="https://i.imgur.com/o2yYOnK.png",
             title="Grading",
-            description="Select a team and assignment using the dropdowns below.",
+            description="Select a team and an assignment using the dropdowns below.",
             timestamp=True,
         )
 
@@ -159,34 +159,32 @@ class DistributeConfirmButtons(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=None)
 
 
-class GradeAssignmentDropdown(discord.ui.Select):
-    def __init__(self, options: list[discord.SelectOption]) -> None:
+class GradeDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]):
         super().__init__()
         self.options = options
-        self.selected_assignment = None
+        self.value = None
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        self.selected_assignment = self.values[0]
+        await interaction.response.defer()
+        self.value = self.values[0]
 
-        callback_interaction(
-            selected_assignment=self.view.children[0].selected_assignment,
-            selected_team=self.view.children[1].selected_team,
-        )
-
-
-class GradeTeamDropdown(discord.ui.Select):
-    def __init__(self, options: list[discord.SelectOption]) -> None:
-        super().__init__()
-        self.options = options
-        self.selected_team = None
-
-    async def callback(self, interaction: discord.Interaction) -> None:
-        self.selected_team = self.values[0]
-
-
-def callback_interaction(selected_assignment: str = None, selected_team: str = None):
-    if selected_assignment and selected_team:
-        embed = embeds.make_embed()
+        assignment = self.view.children[0].value
+        team = self.view.children[1].value
+        if assignment and team:
+            embed = embeds.make_embed(
+                interaction=interaction,
+                color=discord.Color.blurple(),
+                thumbnail_url="https://i.imgur.com/o2yYOnK.png",
+                title="Grading",
+                description="Currently updating grades for:",
+                fields=[
+                    {"name": "Assignment:", "value": assignment, "inline": False},
+                    {"name": "Team:", "value": team, "inline": False},
+                ],
+                timestamp=True,
+            )
+            await interaction.edit_original_response(embed=embed, view=None)
 
 
 async def setup(bot: commands.Bot) -> None:
