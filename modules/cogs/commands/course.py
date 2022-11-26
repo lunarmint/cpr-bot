@@ -43,22 +43,22 @@ class CourseCog(commands.GroupCog, group_name="course"):
             edit_course_button.disabled = True
             remove_course_button.disabled = True
 
-        manage_course_buttons = discord.ui.View()
-        manage_course_buttons.add_item(create_course_button)
-        manage_course_buttons.add_item(edit_course_button)
-        manage_course_buttons.add_item(remove_course_button)
+        view = discord.ui.View()
+        view.add_item(create_course_button)
+        view.add_item(edit_course_button)
+        view.add_item(remove_course_button)
 
-        return embed, manage_course_buttons
+        return embed, view
 
     @app_commands.command(name="view", description="View your current course.")
     async def view(self, interaction: discord.Interaction) -> None:
-        embed, manage_course_buttons = await self.main_view(interaction)
+        embed, view = await self.main_view(interaction)
 
         check = await helpers.instructor_check(interaction)
         if isinstance(check, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        await interaction.response.send_message(embed=embed, view=manage_course_buttons, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
 class CreateCourseButton(discord.ui.Button):
