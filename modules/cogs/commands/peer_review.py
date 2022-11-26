@@ -1,6 +1,7 @@
 import logging
 import random
 
+import arrow
 import discord
 import discord.ui
 from discord import app_commands
@@ -74,6 +75,47 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             embed=embed, view=DistributeConfirmButtons(peer_reviews, peer_review_string), ephemeral=True
         )
 
+    @peer_review.command(name="grade", description="Grade peer reviews.")
+    async def grade(self, interaction: discord.Interaction):
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        team_result = team_collection.find_one(team_query)
+
+        if team_result and team_result["peer_review"] is None:
+            embed = embeds.make_embed(
+                interaction=interaction,
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description="Peer review distribution for teams has not been performed yet. Please check back later!",
+                timestamp=True,
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        assignment_collection = database.Database().get_collection("assignments")
+        assignment_query = {"guild_id": interaction.guild_id}
+        assignment_results = assignment_collection.find(assignment_query)
+        current_timestamp = arrow.Arrow.utcnow().timestamp()
+        assignment_options = [
+            discord.SelectOption(label=assignment["name"])
+            for assignment in assignment_results
+            if current_timestamp > assignment["due_date"]
+        ]
+        team_options = [discord.SelectOption(label=name) for name in team_result["peer_review"]]
+
+        view = GradeView()
+        view.add_item(GradeAssignmentDropdown(assignment_options))
+        view.add_item(GradeTeamDropdown(team_options))
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
+            title="Grading",
+            description="Select a team and assignment using the dropdowns below.",
+            timestamp=True,
+        )
+
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 
 class DistributeConfirmButtons(discord.ui.View):
     def __init__(self, peer_reviews, peer_review_string) -> None:
@@ -115,6 +157,36 @@ class DistributeConfirmButtons(discord.ui.View):
             timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
+
+
+class GradeAssignmentDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]) -> None:
+        super().__init__()
+        self.options = options
+        self.selected_assignment = None
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        self.selected_assignment = self.values[0]
+
+        callback_interaction(
+            selected_assignment=self.view.children[0].selected_assignment,
+            selected_team=self.view.children[1].selected_team,
+        )
+
+
+class GradeTeamDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]) -> None:
+        super().__init__()
+        self.options = options
+        self.selected_team = None
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        self.selected_team = self.values[0]
+
+
+def callback_interaction(selected_assignment: str = None, selected_team: str = None):
+    if selected_assignment and selected_team:
+        embed = embeds.make_embed()
 
 
 async def setup(bot: commands.Bot) -> None:
