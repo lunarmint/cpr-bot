@@ -19,6 +19,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
         color=discord.Color.red(),
         thumbnail_url="https://i.imgur.com/boVVFnQ.png",
         title="Error",
+        timestamp=True,
     )
 
     if result is None:
@@ -42,6 +43,7 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | None
             thumbnail_url="https://i.imgur.com/boVVFnQ.png",
             title="Error",
             description="Cannot execute this action because this server is not associated with any courses yet.",
+            timestamp=True,
         )
 
 
@@ -57,6 +59,7 @@ async def role_availability_check(interaction: discord.Interaction) -> discord.E
             title="Error",
             description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
             footer="Please contact your instructor or server owner if you are not one.",
+            timestamp=True,
         )
 
 
@@ -76,6 +79,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
             title="Error",
             description="No instructor role was found. Use the command `/settings role` to assign a role with the instructor permission.",
             footer="Please contact your instructor or server owner if you are not one.",
+            timestamp=True,
         )
 
     if result["teams_locked"]:
@@ -86,6 +90,7 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
             title="Error",
             description="You can no longer create, join, leave, or update teams.",
             footer="Contact your instructor for more information.",
+            timestamp=True,
         )
 
 
@@ -113,6 +118,7 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
             thumbnail_url="https://i.imgur.com/40eDcIB.png",
             title="Error",
             description=f"Command is on cooldown. Please try again in:\n\n {duration_string}.",
+            timestamp=True,
         )
 
 
