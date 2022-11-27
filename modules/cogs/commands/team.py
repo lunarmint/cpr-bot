@@ -27,7 +27,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         team_collection = database.Database().get_collection("teams")
         team_query = {"guild_id": interaction.guild_id, "name": name}
         team_result = team_collection.find_one(team_query)
-        if team_result["name"] in (name, name.lower()):
+        if team_result and team_result["name"] in (name, name.lower()):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -581,6 +581,10 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
 
         new_value = {"$set": {"name": new_name}}
         team_collection.update_one(team_query, new_value)
+
+        team_query = {"guild_id": interaction.guild_id, "peer_review": self.name}
+        new_value = {"$set": {"peer_review.$": new_name}}
+        team_collection.update_many(team_query, new_value)
 
         channel = interaction.guild.get_channel(team_result["channel_id"])
         await channel.edit(name=new_name)
