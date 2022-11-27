@@ -346,7 +346,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name.value}
         result = collection.find_one(query)
-        if result["name"] in (self.assignment_name.value, self.assignment_name.value.lower()):
+        if result and result["name"] in (self.assignment_name.value, self.assignment_name.value.lower()):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
