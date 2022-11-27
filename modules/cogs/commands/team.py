@@ -25,10 +25,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
-        name_lowercase = name.lower()
-        team_query = {"name_lowercase": name_lowercase}
+        team_query = {"name": name}
         team_result = team_collection.find_one(team_query)
-        if team_result:
+        if team_result["name"] in (name, name.lower()):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -76,7 +75,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         settings_result = settings_collection.find_one(settings_query)
 
         team_collection = database.Database().get_collection("teams")
-        new_team_query = {"name_lowercase": team.lower()}
+        new_team_query = {"name": team}
         new_team_result = team_collection.find_one(new_team_query)
 
         if len(new_team_result["members"]) >= settings_result["team_size"]:
@@ -415,18 +414,15 @@ class CreateTeamConfirmButtons(discord.ui.View):
         if not any(role.id == settings_result["role_id"] for role in interaction.user.roles):
             permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
 
-        name_lowercase = self.name.lower()
-        formatted_name = name_lowercase.replace(" ", "-")
         team_category = await interaction.guild.create_category(name=self.name)
         team_channel = await interaction.guild.create_text_channel(
-            name=formatted_name, category=team_category, overwrites=permission
+            name=self.name, category=team_category, overwrites=permission
         )
 
         team_document = {
             "guild_id": interaction.guild_id,
             "channel_id": team_channel.id,
             "name": self.name,
-            "name_lowercase": name_lowercase,
             "members": [],
         }
         team_collection = database.Database().get_collection("teams")
@@ -468,14 +464,14 @@ class JoinTeamConfirmButtons(discord.ui.View):
         if self.current_team:
             channel = interaction.guild.get_channel(self.current_team["channel_id"])
             await channel.set_permissions(interaction.user, overwrite=None)
-            current_team_query = {"name_lowercase": self.current_team["name_lowercase"]}
+            current_team_query = {"name": self.current_team["name"]}
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
         channel = interaction.guild.get_channel(self.new_team["channel_id"])
         await channel.set_permissions(interaction.user, read_messages=True)
 
-        new_team_query = {"name_lowercase": self.new_team["name_lowercase"]}
+        new_team_query = {"name": self.new_team["name"]}
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
 
@@ -583,18 +579,11 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
         team_query = {"members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
 
-        new_name_lowercase = new_name.lower()
-        new_value = {
-            "$set": {
-                "name": new_name,
-                "name_lowercase": new_name_lowercase,
-            }
-        }
+        new_value = {"$set": {"name": new_name}}
         team_collection.update_one(team_query, new_value)
 
         channel = interaction.guild.get_channel(team_result["channel_id"])
-        formatted_name = new_name_lowercase.replace(" ", "-")
-        await channel.edit(name=formatted_name)
+        await channel.edit(name=new_name)
 
         category = channel.category
         await category.edit(name=new_name)

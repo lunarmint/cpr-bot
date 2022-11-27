@@ -74,7 +74,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         )
 
         collection = database.Database().get_collection("assignments")
-        query = {"guild_id": interaction.guild_id, "name_lowercase": assignment.lower()}
+        query = {"guild_id": interaction.guild_id, "name": assignment}
         result = collection.find_one(query)
 
         if result is None:
@@ -344,9 +344,9 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("assignments")
-        query = {"guild_id": interaction.guild_id, "name_lowercase": self.assignment_name.value.lower()}
+        query = {"guild_id": interaction.guild_id, "name": self.assignment_name.value}
         result = collection.find_one(query)
-        if result:
+        if result["name"] in (self.assignment_name.value, self.assignment_name.value.lower()):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -406,7 +406,6 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         document = {
             "guild_id": interaction.guild_id,
             "name": self.assignment_name.value,
-            "name_lowercase": self.assignment_name.value.lower(),
             "points": points,
             "due_date": time.timestamp(),
             "instructions": self.instructions.value,
@@ -545,7 +544,6 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         new_value = {
             "$set": {
                 "name": self.name.value,
-                "name_lowercase": self.name.value.lower(),
                 "points": points,
                 "due_date": time.timestamp(),
                 "instructions": self.instructions.value,

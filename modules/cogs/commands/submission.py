@@ -54,7 +54,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         await interaction.response.defer(ephemeral=True)
 
         assignment_collection = database.Database().get_collection("assignments")
-        assignment_query = {"guild_id": interaction.guild_id, "name_lowercase": assignment.lower()}
+        assignment_query = {"guild_id": interaction.guild_id, "name": assignment}
         assignment_result = assignment_collection.find_one(assignment_query)
 
         if assignment_result is None:
