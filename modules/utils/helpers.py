@@ -34,7 +34,7 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
 
 async def course_check(interaction: discord.Interaction) -> discord.Embed | None:
     collection = database.Database().get_collection("courses")
-    query = {"user_id": interaction.user.id, "guild_id": interaction.guild_id}
+    query = {"guild_id": interaction.guild_id, "user_id": interaction.user.id}
     result = collection.find_one(query)
     if result is None:
         return embeds.make_embed(
@@ -123,10 +123,10 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
 
 
 async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
-    settings_collection = database.Database().get_collection("settings")
-    settings_query = {"guild_id": interaction.guild_id}
-    settings_result = settings_collection.find_one(settings_query)
-    if settings_result and any(settings_result["role_id"] == role.id for role in interaction.user.roles):
+    setting_collection = database.Database().get_collection("settings")
+    setting_query = {"guild_id": interaction.guild_id}
+    setting_result = setting_collection.find_one(setting_query)
+    if setting_result and any(setting_result["role_id"] == role.id for role in interaction.user.roles):
         return
 
     cooldown_collection = database.Database().get_collection("cooldown")
@@ -135,17 +135,17 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
     if cooldown_result is None:
         return
 
-    tasks_collection = database.Database().get_collection("tasks")
-    tasks_query = {
+    task_collection = database.Database().get_collection("tasks")
+    task_query = {
         "guild_id": interaction.guild_id,
         "user_id": interaction.user.id,
         "command": command,
     }
-    tasks_result = tasks_collection.find_one(tasks_query)
+    tasks_result = task_collection.find_one(task_query)
     if tasks_result:
         remaining = tasks_result["remaining"] - 1 if tasks_result["remaining"] > 1 else 0
         new_value = {"$set": {"remaining": remaining}}
-        tasks_collection.update_one(tasks_query, new_value)
+        task_collection.update_one(task_query, new_value)
 
     timestamp = arrow.utcnow().timestamp()
     task_document = {
@@ -155,7 +155,7 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
         "ready_on": timestamp + cooldown_result["per"],
         "remaining": cooldown_result["rate"] - 1,
     }
-    tasks_collection.insert_one(task_document)
+    task_collection.insert_one(task_document)
 
 
 async def get_command(
