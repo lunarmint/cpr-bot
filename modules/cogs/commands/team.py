@@ -283,6 +283,35 @@ class TeamCog(commands.GroupCog, group_name="team"):
             embed=embed, view=RenameTeamConfirmButtons(team_result["name"]), ephemeral=True
         )
 
+    @app_commands.command(name="remove", description="Remove a team.")
+    async def remove(self, interaction: discord.Interaction):
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id}
+        results = collection.find(query)
+
+        options = [discord.SelectOption(label=result["name"]) for result in results]
+        embed = embeds.make_embed(
+            interaction=interaction,
+            thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
+            title="Remove a team",
+            timestamp=True,
+        )
+
+        if not options:
+            embed.description = "It seems that no teams are available at the moment. Please check back later!"
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
+        embed.description = "Select a team to remove using the dropdown below."
+        await interaction.response.send_message(embed=embed, view=RemoveTeamDropdown(options), ephemeral=True)
+
     @app_commands.command(name="lock", description="Lock all teams.")
     async def lock(self, interaction: discord.Interaction):
         embed = await helpers.course_check(interaction)
@@ -584,6 +613,31 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, ephemeral=True)
+
+
+class RemoveTeamDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]):
+        super().__init__()
+        self.options = options
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id, "name": self.values[0]}
+        result = collection.find_one(query)
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Warning",
+            description=f"You are about to remove the team '{self.values[0]}'. This action is **irreversible**. Do you wish to continue?",
+        )
+        await interaction.response.edit_message(embed=embed, view=RemoveTeamConfirmButtons(self.values[0]))
+
+
+class RemoveTeamConfirmButtons(discord.ui.View):
+    def __init__(self, peer_reviews: dict, peer_review_string: str) -> None:
+        super().__init__()
 
 
 class LockTeamConfirmButtons(discord.ui.View):

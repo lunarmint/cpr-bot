@@ -256,7 +256,7 @@ class GradeBackButton(discord.ui.Button):
 
 
 class GradeUpdateButton(discord.ui.Button):
-    def __init__(self, assignment: str, team: str, max_points: int, current_points: int = None) -> None:
+    def __init__(self, assignment: str, team: str, current_points: int, max_points: int) -> None:
         super().__init__()
         self.label = "Update Grade"
         self.style = discord.ButtonStyle.blurple
@@ -278,7 +278,7 @@ class GradeUpdateButton(discord.ui.Button):
 
 
 class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
-    def __init__(self, assignment: str, team: str, max_points: int, current_points: int = None) -> None:
+    def __init__(self, assignment: str, team: str, current_points: int, max_points: int) -> None:
         super().__init__()
         self.assignment = assignment
         self.team = team
