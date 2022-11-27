@@ -655,6 +655,10 @@ class RemoveTeamConfirmButtons(discord.ui.View):
         await channel.delete()
         collection.delete_one(query)
 
+        query = {"guild_id": interaction.guild_id}
+        new_value = {"$pull": {"peer_review": self.name}}
+        collection.update_many(query, new_value)
+
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.green(),
