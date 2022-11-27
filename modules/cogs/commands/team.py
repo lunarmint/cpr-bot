@@ -25,7 +25,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
-        team_query = {"name": name}
+        team_query = {"guild_id": interaction.guild_id, "name": name}
         team_result = team_collection.find_one(team_query)
         if team_result["name"] in (name, name.lower()):
             embed = embeds.make_embed(
@@ -75,7 +75,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
         settings_result = settings_collection.find_one(settings_query)
 
         team_collection = database.Database().get_collection("teams")
-        new_team_query = {"name": team}
+        new_team_query = {"guild_id": interaction.guild_id, "name": team}
         new_team_result = team_collection.find_one(new_team_query)
 
         if len(new_team_result["members"]) >= settings_result["team_size"]:
@@ -100,7 +100,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        current_team_query = {"members": interaction.user.id}
+        current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         current_team_result = team_collection.find_one(current_team_query)
 
         if current_team_result and current_team_result["name"] == new_team_result["name"]:
@@ -162,7 +162,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
-        team_query = {"members": interaction.user.id}
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
 
         if team_result is None:
@@ -219,7 +219,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             embed.description = "No teams were found. Please try again later!"
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        current_team_query = {"members": interaction.user.id}
+        current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         current_team_result = team_collection.find_one(current_team_query)
 
         teams = []
@@ -255,7 +255,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         team_collection = database.Database().get_collection("teams")
-        team_query = {"members": interaction.user.id}
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
         if team_result is None:
             embed = embeds.make_embed(
@@ -464,14 +464,14 @@ class JoinTeamConfirmButtons(discord.ui.View):
         if self.current_team:
             channel = interaction.guild.get_channel(self.current_team["channel_id"])
             await channel.set_permissions(interaction.user, overwrite=None)
-            current_team_query = {"name": self.current_team["name"]}
+            current_team_query = {"guild_id": interaction.guild_id, "name": self.current_team["name"]}
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
         channel = interaction.guild.get_channel(self.new_team["channel_id"])
         await channel.set_permissions(interaction.user, read_messages=True)
 
-        new_team_query = {"name": self.new_team["name"]}
+        new_team_query = {"guild_id": interaction.guild_id, "name": self.new_team["name"]}
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
 
@@ -507,7 +507,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="leave_team_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("teams")
-        query = {"members": interaction.user.id}
+        query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         value = {"$pull": {"members": interaction.user.id}}
         collection.update_one(query, value)
 
@@ -576,7 +576,7 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         new_name = self.new_name.value
         team_collection = database.Database().get_collection("teams")
-        team_query = {"members": interaction.user.id}
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
 
         new_value = {"$set": {"name": new_name}}

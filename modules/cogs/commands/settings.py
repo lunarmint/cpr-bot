@@ -263,7 +263,7 @@ class CooldownDropdown(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("cooldown")
-        query = {"command": self.values[0]}
+        query = {"guild_id": interaction.guild_id, "command": self.values[0]}
         result = collection.find_one(query)
 
         cooldown_modal = CooldownModal(

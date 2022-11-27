@@ -81,7 +81,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
             return await interaction.followup.send(embed=embed)
 
         team_collection = database.Database().get_collection("teams")
-        team_query = {"members": interaction.user.id}
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
 
         if team_result is None:
