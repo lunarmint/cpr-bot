@@ -39,7 +39,13 @@ class CourseCog(commands.GroupCog, group_name="course"):
             embed.add_field(name="CRN:", value=result["crn"], inline=False)
             create_course_button.disabled = True
         else:
-            embed.description = "It seems that you haven't created any courses yet..."
+            command = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="role")
+            embed.description = (
+                "This server is not being associated with any courses yet.\n\n"
+                f"If you are an instructor, assign the instructor permission to a role using {command.mention} first if you haven't done so yet. "
+                "Assign yourself with the aforementioned role in Discord settings, then run this command again "
+                "and the course manage buttons will be available to use."
+            )
             edit_course_button.disabled = True
             remove_course_button.disabled = True
 
