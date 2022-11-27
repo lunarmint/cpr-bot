@@ -19,7 +19,7 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
     peer_review = app_commands.Group(name="review", description="Peer review commands.")
 
     @peer_review.command(name="distribute", description="Distribute the peer reviews.")
-    async def distribute(self, interaction: discord.Interaction):
+    async def distribute(self, interaction: discord.Interaction) -> None:
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -78,7 +78,7 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         )
 
     @staticmethod
-    async def grade_view(interaction: discord.Interaction):
+    async def grade_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
 
         team_collection = database.Database().get_collection("teams")
@@ -136,7 +136,7 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         return embed, view
 
     @peer_review.command(name="grade", description="Grade peer reviews.")
-    async def grade(self, interaction: discord.Interaction):
+    async def grade(self, interaction: discord.Interaction) -> None:
         embed, view = await self.grade_view(interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -184,7 +184,7 @@ class DistributeConfirmButtons(discord.ui.View):
 
 
 class GradeDropdown(discord.ui.Select):
-    def __init__(self, options: list[discord.SelectOption]):
+    def __init__(self, options: list[discord.SelectOption]) -> None:
         super().__init__()
         self.options = options
         self.value = None
