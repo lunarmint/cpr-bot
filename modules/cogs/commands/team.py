@@ -283,15 +283,16 @@ class TeamCog(commands.GroupCog, group_name="team"):
             embed=embed, view=RenameTeamConfirmButtons(team_result["name"]), ephemeral=True
         )
 
-    @app_commands.command(name="remove", description="Remove a team.")
-    async def remove(self, interaction: discord.Interaction):
+    @staticmethod
+    async def remove_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+        view = discord.ui.View()
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
 
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
 
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id}
@@ -307,10 +308,17 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         if not options:
             embed.description = "It seems that no teams are available at the moment. Please check back later!"
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
 
         embed.description = "Select a team to remove using the dropdown below."
-        await interaction.response.send_message(embed=embed, view=RemoveTeamDropdown(options), ephemeral=True)
+        view = discord.ui.View()
+        view.add_item(RemoveTeamDropdown(options))
+        return embed, view
+
+    @app_commands.command(name="remove", description="Remove a team.")
+    async def remove(self, interaction: discord.Interaction):
+        embed, view = await self.remove_view(interaction)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="lock", description="Lock all teams.")
     async def lock(self, interaction: discord.Interaction):
@@ -621,10 +629,6 @@ class RemoveTeamDropdown(discord.ui.Select):
         self.options = options
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        collection = database.Database().get_collection("teams")
-        query = {"guild_id": interaction.guild_id, "name": self.values[0]}
-        result = collection.find_one(query)
-
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.yellow(),
@@ -636,8 +640,60 @@ class RemoveTeamDropdown(discord.ui.Select):
 
 
 class RemoveTeamConfirmButtons(discord.ui.View):
-    def __init__(self, peer_reviews: dict, peer_review_string: str) -> None:
+    def __init__(self, name: str) -> None:
         super().__init__()
+        self.name = name
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="remove_team_confirm")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id, "name": self.name}
+        result = collection.find_one(query)
+
+        channel = interaction.guild.get_channel(result["channel_id"])
+        await channel.category.delete()
+        await channel.delete()
+        collection.delete_one(query)
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/oPlYcu6.png",
+            title="Team removed",
+            description=f"Successfully removed team '{self.name}'.",
+            timestamp=True,
+        )
+
+        view = discord.ui.View()
+        view.add_item(RemoveTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="remove_team_cancel")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.blurple(),
+            thumbnail_url="https://i.imgur.com/QQiSpLF.png",
+            title="Action cancelled",
+            description="Your team removal request was canceled.",
+            timestamp=True,
+        )
+
+        view = discord.ui.View()
+        view.add_item(RemoveTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
+
+
+class RemoveTeamBackButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Go Back"
+        self.style = discord.ButtonStyle.gray
+        self.custom_id = "grade_back"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed, view = await TeamCog.remove_view(interaction)
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class LockTeamConfirmButtons(discord.ui.View):
