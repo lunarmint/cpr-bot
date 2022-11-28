@@ -1,5 +1,4 @@
 import logging
-from typing import Mapping, Any, List
 
 import discord
 from discord import app_commands
@@ -60,96 +59,68 @@ class TeamCog(commands.GroupCog, group_name="team"):
         )
         await interaction.response.send_message(embed=embed, view=CreateTeamConfirmButtons(name), ephemeral=True)
 
-    @app_commands.command(name="join", description="Join a team.")
-    async def join(self, interaction: discord.Interaction, team: str) -> None:
+    @staticmethod
+    async def join_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+        view = discord.ui.View()
+
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
 
         embed = await helpers.team_lock_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
 
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
 
         team_collection = database.Database().get_collection("teams")
-        new_team_query = {"guild_id": interaction.guild_id, "name": team}
-        new_team_result = team_collection.find_one(new_team_query)
-
-        if len(new_team_result["members"]) >= settings_result["team_size"]:
-            embed = embeds.make_embed(
-                interaction=interaction,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description=f"The team '{new_team_result['name']}' is already full.",
-                timestamp=True,
-            )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
-
-        if new_team_result is None:
-            embed = embeds.make_embed(
-                interaction=interaction,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description="The specified team name does not exist.",
-                timestamp=True,
-            )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
 
         current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         current_team_result = team_collection.find_one(current_team_query)
 
-        if current_team_result and current_team_result["name"] == new_team_result["name"]:
+        new_team_query = {"guild_id": interaction.guild_id}
+        new_team_results = team_collection.find(new_team_query)
+
+        options = []
+        for result in new_team_results:
+            if current_team_result and current_team_result["name"] == result["name"]:
+                continue
+
+            if len(result["members"]) < settings_result["team_size"]:
+                options.append(discord.SelectOption(label=result["name"]))
+
+        if not options:
+            command = await helpers.get_command(interaction=interaction, command="team", subcommand_group="view")
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description="Cannot join a team that you are already in.",
+                description=f"No teams are available to join at the moment. Use {command.mention} to view available teams.",
                 timestamp=True,
             )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return embed, view
+
+        view.add_item(
+            JoinTeamDropdown(options=options, current_team=current_team_result["name"] if current_team_result else None)
+        )
 
         embed = embeds.make_embed(
             interaction=interaction,
-            color=discord.Color.yellow(),
-            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
-            title="Warning",
+            thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
+            title="Join team",
+            description="Use the dropdown below to join a currently available team.",
+            timestamp=True,
         )
 
-        if current_team_result:
-            embed.description = (
-                f"You are currently in the team '{current_team_result['name']}'. "
-                f"Do you still wish to join the team '{new_team_result['name']}'?"
-            )
-        else:
-            embed.description = f"You are about to join the team '{new_team_result['name']}'. Do you wish to continue?"
+        return embed, view
 
-        await interaction.response.send_message(
-            embed=embed,
-            view=JoinTeamConfirmButtons(current_team=current_team_result, new_team=new_team_result),
-            ephemeral=True,
-        )
-
-    @join.autocomplete("team")
-    async def join_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
-        settings_collection = database.Database().get_collection("settings")
-        settings_query = {"guild_id": interaction.guild_id}
-        settings_result = settings_collection.find_one(settings_query)
-
-        team_collection = database.Database().get_collection("teams")
-        team_query = {"guild_id": interaction.guild_id}
-        team_results = [
-            result["name"]
-            for result in team_collection.find(team_query)
-            if len(result["members"]) < settings_result["team_size"]
-        ]
-
-        return [app_commands.Choice(name=team, value=team) for team in team_results if current.lower() in team.lower()]
+    @app_commands.command(name="join", description="Join a team.")
+    async def join(self, interaction: discord.Interaction) -> None:
+        embed, view = await self.join_view(interaction)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="leave", description="Leave the current team.")
     async def leave(self, interaction: discord.Interaction) -> None:
@@ -451,8 +422,36 @@ class CreateTeamConfirmButtons(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=None)
 
 
+class JoinTeamDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption], current_team: str = None) -> None:
+        super().__init__()
+        self.options = options
+        self.current_team = current_team
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/s1sRlvc.png",
+            title="Warning",
+        )
+
+        if self.current_team is None:
+            embed.description = f"You are about to join the team '{self.values[0]}'. Do you wish to continue?"
+        else:
+            embed.description = (
+                f"You are currently in the team '{self.current_team}'. "
+                f"Do you wish to leave and join the team '{self.values[0]}'?"
+            )
+
+        await interaction.response.edit_message(
+            embed=embed,
+            view=JoinTeamConfirmButtons(current_team=self.current_team, new_team=self.values[0]),
+        )
+
+
 class JoinTeamConfirmButtons(discord.ui.View):
-    def __init__(self, current_team: Mapping[str, Any], new_team: Mapping[str, Any]) -> None:
+    def __init__(self, current_team: str, new_team: str) -> None:
         super().__init__()
         self.current_team = current_team
         self.new_team = new_team
@@ -461,17 +460,22 @@ class JoinTeamConfirmButtons(discord.ui.View):
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         collection = database.Database().get_collection("teams")
 
-        if self.current_team:
-            channel = interaction.guild.get_channel(self.current_team["channel_id"])
+        current_team_query = {"guild_id": interaction.guild_id, "name": self.current_team}
+        current_team_result = collection.find_one(current_team_query)
+
+        new_team_query = {"guild_id": interaction.guild_id, "name": self.new_team}
+        new_team_result = collection.find_one(new_team_query)
+
+        if current_team_result:
+            channel = interaction.guild.get_channel(current_team_result["channel_id"])
             await channel.set_permissions(interaction.user, overwrite=None)
-            current_team_query = {"guild_id": interaction.guild_id, "name": self.current_team["name"]}
+            current_team_query = {"guild_id": interaction.guild_id, "name": current_team_result["name"]}
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
-        channel = interaction.guild.get_channel(self.new_team["channel_id"])
+        channel = interaction.guild.get_channel(new_team_result["channel_id"])
         await channel.set_permissions(interaction.user, read_messages=True)
 
-        new_team_query = {"guild_id": interaction.guild_id, "name": self.new_team["name"]}
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
 
@@ -480,10 +484,13 @@ class JoinTeamConfirmButtons(discord.ui.View):
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
             title="Success",
-            description=f"You were successfully added to the team '{self.new_team['name']}'.",
+            description=f"You were successfully added to the team '{self.new_team}'.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        view = discord.ui.View()
+        view.add_item(JoinTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="join_team_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -495,7 +502,22 @@ class JoinTeamConfirmButtons(discord.ui.View):
             description="Your team join request was canceled.",
             timestamp=True,
         )
-        await interaction.response.edit_message(embed=embed, view=None)
+
+        view = discord.ui.View()
+        view.add_item(JoinTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
+
+
+class JoinTeamBackButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Go Back"
+        self.style = discord.ButtonStyle.gray
+        self.custom_id = "join_team_back"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed, view = await TeamCog.join_view(interaction)
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class LeaveTeamConfirmButtons(discord.ui.View):
@@ -686,7 +708,7 @@ class RemoveTeamBackButton(discord.ui.Button):
         super().__init__()
         self.label = "Go Back"
         self.style = discord.ButtonStyle.gray
-        self.custom_id = "grade_back"
+        self.custom_id = "remove_team_back"
 
     async def callback(self, interaction: discord.Interaction) -> None:
         embed, view = await TeamCog.remove_view(interaction)
