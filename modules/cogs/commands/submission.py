@@ -92,7 +92,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
                 color=discord.Color.red(),
                 thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
-                description=f"You are not in any teams yet. Use {create_team.mention} or {join_team.mention} to join a team first.",
+                description=f"You are not in any teams yet. Use {create_team.mention} and {join_team.mention} to join a team first.",
                 timestamp=True,
             )
             return await interaction.followup.send(embed=embed)
@@ -102,7 +102,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         )
 
         file_dir = (
-            pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "submissions", assignment)
+            pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "submissions", team_result["name"], assignment)
         )
         file_dir.mkdir(parents=True, exist_ok=True)
 
@@ -113,8 +113,8 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
             interaction=interaction,
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/W7VJssL.png",
-            title="Attachment uploaded",
-            description=f"Successfully uploaded an attachment to '{assignment}'.",
+            title="Assignment submitted",
+            description=f"Successfully submitted assignment '{assignment}'.",
             timestamp=True,
         )
 
