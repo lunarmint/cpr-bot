@@ -149,7 +149,7 @@ class SubmissionDropdown(discord.ui.Select):
         query = {"guild_id": interaction.guild_id, "name": self.values[0]}
         result = collection.find_one(query)
 
-        def get_hyperlinks() -> list[str]:
+        def task() -> list[str]:
             root = pathlib.Path(__file__).parents[3]
             file_dir = root.joinpath("uploads", str(interaction.guild_id), "submissions", result["name"]).glob("**/*")
             hyperlinks = []
@@ -168,8 +168,8 @@ class SubmissionDropdown(discord.ui.Select):
                     hyperlinks.append(f"[Download]({response.text})")
             return hyperlinks
 
-        hyperlinks_list = await asyncio.to_thread(get_hyperlinks)
-        hyperlinks_value = "\n".join(hyperlinks_list)
+        hyperlinks_list = await asyncio.to_thread(task)
+        hyperlinks = "\n".join(hyperlinks_list)
 
         due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
@@ -186,7 +186,7 @@ class SubmissionDropdown(discord.ui.Select):
                 {"name": "Instructions:", "value": result["instructions"], "inline": False},
                 {
                     "name": "Your Submissions:",
-                    "value": f"{hyperlinks_value if hyperlinks_value else None}",
+                    "value": f"{hyperlinks if hyperlinks else None}",
                     "inline": False,
                 },
             ],

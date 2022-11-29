@@ -134,7 +134,7 @@ class AssignmentDropdown(discord.ui.Select):
         result = collection.find_one(query)
 
         hyperlinks_list = await get_hyperlinks(interaction=interaction, assignment_name=result["name"])
-        hyperlinks_value = "\n".join(hyperlinks_list)
+        hyperlinks = "\n".join(hyperlinks_list)
 
         due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
@@ -151,7 +151,7 @@ class AssignmentDropdown(discord.ui.Select):
                 {"name": "Instructions:", "value": result["instructions"], "inline": False},
                 {
                     "name": "Attachment:",
-                    "value": f"{hyperlinks_value if hyperlinks_value else None}",
+                    "value": f"{hyperlinks if hyperlinks else None}",
                     "inline": False,
                 },
             ],
@@ -225,7 +225,7 @@ class RemoveAssignmentButton(discord.ui.Button):
         result = collection.find_one(query)
 
         hyperlinks_list = await get_hyperlinks(interaction=interaction, assignment_name=result["name"])
-        hyperlinks_value = "\n".join(hyperlinks_list)
+        hyperlinks = "\n".join(hyperlinks_list)
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -240,7 +240,7 @@ class RemoveAssignmentButton(discord.ui.Button):
                 {"name": "Instructions:", "value": result["instructions"], "inline": False},
                 {
                     "name": "Attachment:",
-                    "value": f"{hyperlinks_value if hyperlinks_value else None}",
+                    "value": f"{hyperlinks if hyperlinks else None}",
                     "inline": False,
                 },
             ],
