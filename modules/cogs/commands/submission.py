@@ -56,6 +56,10 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
             embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
         )
 
+        embed = await helpers.team_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.edit_original_response(embed=embed)
+
         assignment_collection = database.Database().get_collection("assignments")
         assignment_query = {"guild_id": interaction.guild_id, "name": assignment}
         assignment_result = assignment_collection.find_one(assignment_query)
@@ -87,21 +91,10 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         team_result = team_collection.find_one(team_query)
 
-        if team_result is None:
-            create_team = await helpers.get_command(interaction=interaction, command="team", subcommand_group="create")
-            join_team = await helpers.get_command(interaction=interaction, command="team", subcommand_group="join")
-            embed = embeds.make_embed(
-                interaction=interaction,
-                color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
-                title="Error",
-                description=f"You are not in any teams yet. Use {create_team.mention} and {join_team.mention} to join a team first.",
-                timestamp=True,
-            )
-            return await interaction.edit_original_response(embed=embed)
-
         file_dir = (
-            pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "submissions", team_result["name"], assignment)
+            pathlib.Path(__file__)
+            .parents[3]
+            .joinpath("uploads", str(interaction.guild_id), "submissions", team_result["name"], assignment)
         )
         file_dir.mkdir(parents=True, exist_ok=True)
 
@@ -142,16 +135,22 @@ class SubmissionDropdown(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=self.view
+            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
         )
 
-        collection = database.Database().get_collection("assignments")
-        query = {"guild_id": interaction.guild_id, "name": self.values[0]}
-        result = collection.find_one(query)
+        assignment_collection = database.Database().get_collection("assignments")
+        assignment_query = {"guild_id": interaction.guild_id, "name": self.values[0]}
+        assignment_result = assignment_collection.find_one(assignment_query)
+
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        team_result = team_collection.find_one(team_query)
 
         def task() -> list[str]:
             root = pathlib.Path(__file__).parents[3]
-            file_dir = root.joinpath("uploads", str(interaction.guild_id), "submissions", result["name"]).glob("**/*")
+            file_dir = root.joinpath(
+                "uploads", str(interaction.guild_id), "submissions", team_result["name"], self.values[0]
+            ).glob("**/*")
             hyperlinks = []
             for item in file_dir:
                 if item.is_file():
@@ -171,7 +170,7 @@ class SubmissionDropdown(discord.ui.Select):
         hyperlinks_list = await asyncio.to_thread(task)
         hyperlinks = "\n".join(hyperlinks_list)
 
-        due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
+        due_date = arrow.Arrow.fromtimestamp(assignment_result["due_date"], tzinfo="EST")
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
 
         embed = embeds.make_embed(
@@ -180,10 +179,10 @@ class SubmissionDropdown(discord.ui.Select):
             title="Assignments",
             description="Use the dropdown below to select an assignment and view your submissions.",
             fields=[
-                {"name": "Assignment Name:", "value": result["name"], "inline": False},
-                {"name": "Points Possible:", "value": result["points"], "inline": False},
+                {"name": "Assignment Name:", "value": assignment_result["name"], "inline": False},
+                {"name": "Points Possible:", "value": assignment_result["points"], "inline": False},
                 {"name": "Due Date:", "value": duration_string, "inline": False},
-                {"name": "Instructions:", "value": result["instructions"], "inline": False},
+                {"name": "Instructions:", "value": assignment_result["instructions"], "inline": False},
                 {
                     "name": "Your Submissions:",
                     "value": f"{hyperlinks if hyperlinks else None}",
