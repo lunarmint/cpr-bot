@@ -94,6 +94,24 @@ async def team_lock_check(interaction: discord.Interaction) -> discord.Embed | N
         )
 
 
+async def team_check(interaction: discord.Interaction) -> discord.Embed | None:
+    collection = database.Database().get_collection("teams")
+    query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+    result = collection.find_one(query)
+
+    if result is None:
+        create_team = await get_command(interaction=interaction, command="team", subcommand_group="create")
+        join_team = await get_command(interaction=interaction, command="team", subcommand_group="join")
+        return embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description=f"You are not in any teams yet. Use {create_team.mention} and {join_team.mention} to join a team first.",
+            timestamp=True,
+        )
+
+
 async def cooldown_check(interaction: discord.Interaction, command: str) -> discord.Embed | None:
     settings_collection = database.Database().get_collection("settings")
     settings_query = {"guild_id": interaction.guild_id}
