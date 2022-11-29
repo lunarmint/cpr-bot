@@ -52,6 +52,9 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
     @app_commands.command(name="upload", description="Submit an assignment.")
     async def upload(self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment):
         await interaction.response.defer(ephemeral=True)
+        await interaction.edit_original_response(
+            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
+        )
 
         assignment_collection = database.Database().get_collection("assignments")
         assignment_query = {"guild_id": interaction.guild_id, "name": assignment}
@@ -66,7 +69,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
                 description="The specified assignment does not exist.",
                 timestamp=True,
             )
-            return await interaction.followup.send(embed=embed)
+            return await interaction.edit_original_response(embed=embed)
 
         current_timestamp = arrow.Arrow.utcnow().timestamp()
         if current_timestamp > assignment_result["due_date"]:
@@ -78,7 +81,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
                 description="This assignment is already past due.",
                 timestamp=True,
             )
-            return await interaction.followup.send(embed=embed)
+            return await interaction.edit_original_response(embed=embed)
 
         team_collection = database.Database().get_collection("teams")
         team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
@@ -95,11 +98,7 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
                 description=f"You are not in any teams yet. Use {create_team.mention} and {join_team.mention} to join a team first.",
                 timestamp=True,
             )
-            return await interaction.followup.send(embed=embed)
-
-        await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
-        )
+            return await interaction.edit_original_response(embed=embed)
 
         file_dir = (
             pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "submissions", team_result["name"], assignment)
