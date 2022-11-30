@@ -168,7 +168,7 @@ class AssignmentDropdown(discord.ui.Select):
         except IndexError:
             pass
 
-        if len(self.view.children) > 0:
+        if len(self.view.children) > 1:
             if result["peer_review"]:
                 self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
             else:
