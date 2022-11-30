@@ -151,18 +151,12 @@ class AssignmentDropdown(discord.ui.Select):
 
         embed = await helpers.instructor_check(interaction)
         if not isinstance(embed, discord.Embed):
-            if len(self.view.children) <= 4:
-                if result["peer_review"]:
-                    self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
-                else:
-                    self.view.add_item(PeerReviewDisabledButton(assignment_name=self.values[0]))
+            peer_review_button = PeerReviewButton(assignment_name=self.values[0], peer_review=collection.find_one(query)["peer_review"])
+            if any(children.custom_id in ("peer_review_enabled", "peer_review_disabled") for children in self.view.children):
+                self.view.remove_item(self.view.children[4])
+                self.view.add_item(peer_review_button)
             else:
-                if result["peer_review"]:
-                    self.view.remove_item(self.view.children[4])
-                    self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
-                else:
-                    self.view.remove_item(self.view.children[4])
-                    self.view.add_item(PeerReviewDisabledButton(assignment_name=self.values[0]))
+                self.view.add_item(peer_review_button)
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -430,7 +424,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
 
         view = discord.ui.View()
         view.add_item(BackButton())
-        view.add_item(PeerReviewDisabledButton(assignment_name=self.assignment_name.value))
+        view.add_item(PeerReviewButton(assignment_name=self.assignment_name.value, peer_review=False))
         await interaction.response.edit_message(embed=embed, view=view)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
@@ -592,46 +586,33 @@ class BackButton(discord.ui.Button):
         await interaction.response.edit_message(embed=embed, view=view)
 
 
-class PeerReviewEnabledButton(discord.ui.Button):
-    def __init__(self, assignment_name: str) -> None:
+class PeerReviewButton(discord.ui.Button):
+    def __init__(self, assignment_name: str, peer_review: bool) -> None:
         super().__init__()
-        self.label = "Peer Review Enabled"
-        self.style = discord.ButtonStyle.green
-        self.custom_id = "peer_review_enabled"
+        self.peer_review = peer_review
+        self.label = "Peer Review Enabled" if peer_review else "Peer Review Disabled"
+        self.style = discord.ButtonStyle.green if peer_review else discord.ButtonStyle.red
+        self.custom_id = "peer_review_enabled" if peer_review else "peer_review_disabled"
         self.assignment_name = assignment_name
 
     async def callback(self, interaction: discord.Interaction) -> None:
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
-        new_value = {"$set": {"peer_review": False}}
+
+        if self.peer_review:
+            self.peer_review = False
+            self.label = "Peer Review Disabled"
+            self.style = discord.ButtonStyle.red
+            self.custom_id = "peer_review_disabled"
+            new_value = {"$set": {"peer_review": False}}
+        else:
+            self.peer_review = True
+            self.label = "Peer Review Enabled"
+            self.style = discord.ButtonStyle.green
+            self.custom_id = "peer_review_enabled"
+            new_value = {"$set": {"peer_review": True}}
+
         collection.update_one(query, new_value)
-
-        for index, children in enumerate(self.view.children):
-            if children.custom_id == self.custom_id:
-                self.view.remove_item(self.view.children[index])
-                self.view.add_item(PeerReviewDisabledButton(assignment_name=self.assignment_name))
-
-        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self.view)
-
-
-class PeerReviewDisabledButton(discord.ui.Button):
-    def __init__(self, assignment_name: str) -> None:
-        super().__init__()
-        self.label = "Peer Review Disabled"
-        self.style = discord.ButtonStyle.red
-        self.custom_id = "peer_review_disabled"
-        self.assignment_name = assignment_name
-
-    async def callback(self, interaction: discord.Interaction) -> None:
-        collection = database.Database().get_collection("assignments")
-        query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
-        new_value = {"$set": {"peer_review": True}}
-        collection.update_one(query, new_value)
-
-        for index, children in enumerate(self.view.children):
-            if children.custom_id == self.custom_id:
-                self.view.remove_item(self.view.children[index])
-                self.view.add_item(PeerReviewEnabledButton(assignment_name=self.assignment_name))
 
         await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self.view)
 
