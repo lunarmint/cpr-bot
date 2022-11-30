@@ -110,13 +110,14 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             assignment_options = [
                 discord.SelectOption(label=assignment["name"])
                 for assignment in assignment_results
-                if assignment["due_date"] > current_timestamp
-                and assignment["peer_review"]
+                if assignment["due_date"] > current_timestamp and assignment["peer_review"]
             ]
             team_options = [discord.SelectOption(label=team) for team in team_result["peer_review"]]
         else:
             assignment_options = [discord.SelectOption(label=assignment["name"]) for assignment in assignment_results]
-            team_options = [discord.SelectOption(label=team["name"]) for team in team_collection.find({"guild_id": interaction.guild_id})]
+            team_options = [
+                discord.SelectOption(label=team["name"]) for team in team_collection.find({"guild_id": interaction.guild_id})
+            ]
 
         if not assignment_options:
             embed = embeds.make_embed(
@@ -238,18 +239,6 @@ class GradeDropdown(discord.ui.Select):
         if not assignment or not team:
             return
 
-        embed = embeds.make_embed(
-            interaction=interaction,
-            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
-            title="Grading",
-            description="Currently updating grade for:",
-            fields=[
-                {"name": "Assignment:", "value": assignment, "inline": False},
-                {"name": "Team:", "value": team, "inline": False},
-            ],
-            timestamp=True,
-        )
-
         grade_collection = database.Database().get_collection("grades")
         grade_query = {"guild_id": interaction.guild_id, "name": assignment, "team": team}
         grade_result = grade_collection.find_one(grade_query)
@@ -259,6 +248,19 @@ class GradeDropdown(discord.ui.Select):
         assignment_query = {"guild_id": interaction.guild_id, "name": assignment}
         assignment_result = assignment_collection.find_one(assignment_query)
         max_points = assignment_result["points"]
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
+            title="Grading",
+            description="Currently viewing grades for:",
+            fields=[
+                {"name": "Assignment:", "value": assignment, "inline": False},
+                {"name": "Team:", "value": team, "inline": False},
+                {"name": "Points Earned:", "value": f"{current_points}/{max_points}", "inline": False},
+            ],
+            timestamp=True,
+        )
 
         grade_update_button = GradeUpdateButton(
             assignment=assignment,
