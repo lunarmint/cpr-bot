@@ -111,9 +111,12 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
                 discord.SelectOption(label=assignment["name"])
                 for assignment in assignment_results
                 if assignment["due_date"] > current_timestamp
+                and assignment["peer_review"]
             ]
+            team_options = [discord.SelectOption(label=team) for team in team_result["peer_review"]]
         else:
             assignment_options = [discord.SelectOption(label=assignment["name"]) for assignment in assignment_results]
+            team_options = [discord.SelectOption(label=team["name"]) for team in team_collection.find({"guild_id": interaction.guild_id})]
 
         if not assignment_options:
             embed = embeds.make_embed(
@@ -125,7 +128,15 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             )
             return embed, view
 
-        team_options = [discord.SelectOption(label=name) for name in team_result["peer_review"]]
+        if not team_options:
+            embed = embeds.make_embed(
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description="No teams are available for grading at the moment. Please check back later!",
+                timestamp=True,
+            )
+            return embed, view
 
         view.add_item(GradeDropdown(options=assignment_options))
         view.add_item(GradeDropdown(options=team_options))
@@ -255,15 +266,6 @@ class GradeDropdown(discord.ui.Select):
             current_points=current_points,
             max_points=max_points,
         )
-
-        team_collection = database.Database().get_collection("teams")
-        team_query = {"guild_id": interaction.guild_id, "name": team}
-        team_result = team_collection.find_one(team_query)
-
-        check = await helpers.instructor_check(interaction)
-        if interaction.user.id not in team_result["members"] and isinstance(check, discord.Embed):
-            grade_update_button.disabled = True
-            embed.set_footer(text="You don't have the permission to update this team's grade.")
 
         view = discord.ui.View()
         view.add_item(GradeBackButton())
