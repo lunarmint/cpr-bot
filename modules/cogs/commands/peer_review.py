@@ -420,11 +420,10 @@ class DownloadDropdown(discord.ui.Select):
 
         embed = embeds.make_embed(
             interaction=interaction,
-            color=discord.Color.yellow(),
             thumbnail_url="https://i.imgur.com/o2yYOnK.png",
             title="Peer reviews",
             description="Use the dropdown below to select an assignment you want to download peer reviews from.",
-            fields=[{"value": f"{hyperlinks if hyperlinks else None}", "inline": False}],
+            fields=[{"name": f"{self.values[0]}:", "value": f"{hyperlinks if hyperlinks else None}", "inline": False}],
         )
 
         await interaction.edit_original_response(embed=embed, view=self.view)
