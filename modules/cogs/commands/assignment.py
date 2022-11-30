@@ -623,18 +623,20 @@ async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str)
         file_dir = root.joinpath("uploads", str(interaction.guild_id), "assignments", assignment_name).glob("**/*")
         links = []
         for item in file_dir:
-            if item.is_file():
-                file = item.open(mode="rb")
-                mime_type = magic.from_buffer(file.read(2048), mime=True)
-                file.seek(0)
-                fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
-                encoder = MultipartEncoder(fields=fields)
-                response = requests.post(
-                    url="https://litterbox.catbox.moe/resources/internals/api.php",
-                    data=encoder,
-                    headers={"Content-Type": encoder.content_type},
-                )
-                links.append(f"[Download]({response.text})")
+            if not item.is_file():
+                continue
+
+            file = item.open(mode="rb")
+            mime_type = magic.from_buffer(file.read(2048), mime=True)
+            file.seek(0)
+            fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
+            encoder = MultipartEncoder(fields=fields)
+            response = requests.post(
+                url="https://litterbox.catbox.moe/resources/internals/api.php",
+                data=encoder,
+                headers={"Content-Type": encoder.content_type},
+            )
+            links.append(f"[Download]({response.text})")
         return links
 
     return await asyncio.to_thread(task)
