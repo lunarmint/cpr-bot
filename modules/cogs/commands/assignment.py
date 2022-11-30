@@ -631,7 +631,7 @@ async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str)
     def task():
         root = pathlib.Path(__file__).parents[3]
         file_dir = root.joinpath("uploads", str(interaction.guild_id), "assignments", assignment_name).glob("**/*")
-        hyperlinks = []
+        links = []
         for item in file_dir:
             if item.is_file():
                 file = item.open(mode="rb")
@@ -644,8 +644,8 @@ async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str)
                     data=encoder,
                     headers={"Content-Type": encoder.content_type},
                 )
-                hyperlinks.append(f"[Download]({response.text})")
-        return hyperlinks
+                links.append(f"[Download]({response.text})")
+        return links
 
     return await asyncio.to_thread(task)
 

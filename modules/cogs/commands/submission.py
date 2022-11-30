@@ -153,7 +153,7 @@ class SubmissionDropdown(discord.ui.Select):
             file_dir = root.joinpath(
                 "uploads", str(interaction.guild_id), "submissions", team_result["name"], self.values[0]
             ).glob("**/*")
-            hyperlinks = []
+            links = []
             for item in file_dir:
                 if item.is_file():
                     file = item.open(mode="rb")
@@ -166,8 +166,8 @@ class SubmissionDropdown(discord.ui.Select):
                         data=encoder,
                         headers={"Content-Type": encoder.content_type},
                     )
-                    hyperlinks.append(f"[Download]({response.text})")
-            return hyperlinks
+                    links.append(f"[Download]({response.text})")
+            return links
 
         hyperlinks_list = await asyncio.to_thread(task)
         hyperlinks = "\n".join(hyperlinks_list)
