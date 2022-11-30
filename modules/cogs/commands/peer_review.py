@@ -334,7 +334,7 @@ class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
         else:
             document = {
                 "guild_id": interaction.guild_id,
-                "assignment": self.assignment,
+                "name": self.assignment,
                 "team": self.team,
                 "points": new_points,
             }
