@@ -141,6 +141,29 @@ class AssignmentDropdown(discord.ui.Select):
         due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
 
+        try:
+            self.view.children[2].disabled = False
+            self.view.children[3].disabled = False
+            self.view.children[2].assignment_name = self.values[0]
+            self.view.children[3].assignment_name = self.values[0]
+        except IndexError:
+            pass
+
+        embed = await helpers.instructor_check(interaction)
+        if not isinstance(embed, discord.Embed):
+            if len(self.view.children) <= 4:
+                if result["peer_review"]:
+                    self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
+                else:
+                    self.view.add_item(PeerReviewDisabledButton(assignment_name=self.values[0]))
+            else:
+                if result["peer_review"]:
+                    self.view.remove_item(self.view.children[4])
+                    self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
+                else:
+                    self.view.remove_item(self.view.children[4])
+                    self.view.add_item(PeerReviewDisabledButton(assignment_name=self.values[0]))
+
         embed = embeds.make_embed(
             interaction=interaction,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
@@ -159,20 +182,6 @@ class AssignmentDropdown(discord.ui.Select):
             ],
             timestamp=True,
         )
-
-        try:
-            self.view.children[2].disabled = False
-            self.view.children[3].disabled = False
-            self.view.children[2].assignment_name = self.values[0]
-            self.view.children[3].assignment_name = self.values[0]
-        except IndexError:
-            pass
-
-        if len(self.view.children) > 1:
-            if result["peer_review"]:
-                self.view.add_item(PeerReviewEnabledButton(assignment_name=self.values[0]))
-            else:
-                self.view.add_item(PeerReviewDisabledButton(assignment_name=self.values[0]))
 
         await interaction.edit_original_response(embed=embed, view=self.view)
 
