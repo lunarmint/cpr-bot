@@ -1,11 +1,16 @@
+import asyncio
 import logging
+import pathlib
 import random
 
 import arrow
 import discord
 import discord.ui
+import magic
+import requests
 from discord import app_commands
 from discord.ext import commands
+from requests_toolbelt import MultipartEncoder
 
 from modules.utils import embeds, database, helpers
 
@@ -138,6 +143,30 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
     @peer_review.command(name="grade", description="Grade peer reviews.")
     async def grade(self, interaction: discord.Interaction) -> None:
         embed, view = await self.grade_view(interaction)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+    @peer_review.command(name="download", description="Download peer reviews for an assignment.")
+    async def download(self, interaction: discord.Interaction) -> None:
+        embed = embeds.make_embed(
+            interaction=interaction,
+            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
+            title="Peer reviews",
+            timestamp=True,
+        )
+
+        collection = database.Database().get_collection("assignments")
+        query = {"guild_id": interaction.guild_id}
+        assignments = [item for item in collection.find(query).sort("name")]
+        options = [discord.SelectOption(label=assignment["name"]) for assignment in assignments if assignment["peer_review"]]
+
+        view = discord.ui.View()
+
+        if options:
+            embed.description = "Use the dropdown below to select an assignment you want to download peer reviews from."
+            view.add_item(DownloadDropdown(options=options))
+        else:
+            embed.description = "No assignments are available at the moment. Please check back later!"
+
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
@@ -343,6 +372,62 @@ class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
         view = discord.ui.View()
         view.add_item(GradeBackButton())
         await interaction.response.edit_message(embed=embed, view=view)
+
+
+class DownloadDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]) -> None:
+        super().__init__()
+        self.options = options
+
+    async def callback(self, interaction: discord.Interaction) -> discord.InteractionMessage:
+        await interaction.response.defer()
+        await interaction.edit_original_response(
+            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
+        )
+
+        embed = await helpers.team_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.edit_original_response(embed=embed)
+
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        result = collection.find_one(query)
+
+        def task() -> list[str]:
+            root = pathlib.Path(__file__).parents[3]
+            links = []
+            for index, team in enumerate(result["peer_review"]):
+                file_dir = root.joinpath("uploads", str(interaction.guild_id), "submissions", team, self.values[0]).glob(
+                    "**/*"
+                )
+                for item in file_dir:
+                    if item.is_file():
+                        file = item.open(mode="rb")
+                        mime_type = magic.from_buffer(file.read(2048), mime=True)
+                        file.seek(0)
+                        fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
+                        encoder = MultipartEncoder(fields=fields)
+                        response = requests.post(
+                            url="https://litterbox.catbox.moe/resources/internals/api.php",
+                            data=encoder,
+                            headers={"Content-Type": encoder.content_type},
+                        )
+                        links.append(f"{index + 1}. {team}: [Download]({response.text})")
+            return links
+
+        hyperlinks_list = await asyncio.to_thread(task)
+        hyperlinks = "\n".join(hyperlinks_list)
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.yellow(),
+            thumbnail_url="https://i.imgur.com/o2yYOnK.png",
+            title="Peer reviews",
+            description="Use the dropdown below to select an assignment you want to download peer reviews from.",
+            fields=[{"value": f"{hyperlinks if hyperlinks else None}", "inline": False}],
+        )
+
+        await interaction.edit_original_response(embed=embed, view=self.view)
 
 
 async def setup(bot: commands.Bot) -> None:
