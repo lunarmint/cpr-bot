@@ -50,7 +50,9 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="upload", description="Submit an assignment.")
-    async def upload(self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment):
+    async def upload(
+        self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment
+    ) -> discord.InteractionMessage:
         await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
             embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
