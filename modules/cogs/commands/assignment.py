@@ -72,7 +72,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
-            return await interaction.followup.send(embed=embed)
+            return await interaction.edit_original_response(embed=embed)
 
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": assignment}
@@ -87,7 +87,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
                 description="The specified assignment does not exist.",
                 timestamp=True,
             )
-            return await interaction.followup.send(embed=embed)
+            return await interaction.edit_original_response(embed=embed)
 
         file_dir = (
             pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
