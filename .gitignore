@@ -153,3 +153,5 @@ cython_debug/
 
 # Project specific
 config.yml
+/uploads
+
