@@ -193,8 +193,15 @@ class TeamCog(commands.GroupCog, group_name="team"):
         current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         current_team_result = team_collection.find_one(current_team_query)
 
+        check = await helpers.instructor_check(interaction)
+        instructor = False if isinstance(check, discord.Embed) else True
+
         teams = []
         for index, value in enumerate(team_result):
+            if instructor:
+                teams.append(f"{index + 1}. {value['name']} ({len(value['members'])}/{settings_result['team_size']})")
+                continue
+
             if len(value["members"]) >= settings_result["team_size"]:
                 teams.append(f"{index + 1}. {value['name']} (full)")
             else:
