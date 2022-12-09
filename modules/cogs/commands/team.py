@@ -425,7 +425,8 @@ class CreateTeamConfirmButtons(discord.ui.View):
         }
 
         embed = await helpers.instructor_check(interaction)
-        if isinstance(embed, discord.Embed):
+        instructor = False if isinstance(embed, discord.Embed) else True
+        if not instructor:
             permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
 
         category = await interaction.guild.create_category(name=self.name, overwrites=permission)
@@ -439,7 +440,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "channel_id": channel.id,
             "voice_channel_id": voice_channel.id,
             "name": self.name,
-            "members": [interaction.user.id],
+            "members": [] if instructor else [interaction.user.id],
         }
         team_collection = database.Database().get_collection("teams")
         team_collection.insert_one(team_document)
