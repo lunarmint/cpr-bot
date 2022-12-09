@@ -38,6 +38,17 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         team_query = {"guild_id": interaction.guild_id}
         teams = [team["name"] for team in team_collection.find(team_query)]
 
+        if not teams:
+            embed = embeds.make_embed(
+                interaction=interaction,
+                color=discord.Color.red(),
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+                title="Error",
+                description=f"No teams are created yet. Please check back later!",
+                timestamp=True,
+            )
+            return await interaction.response.send_message(embed=embed, ephemeral=True)
+
         if peer_review_size >= len(teams):
             command = await helpers.get_command(
                 interaction=interaction, command="settings", subcommand_group="peer", subcommand="review"
@@ -45,7 +56,7 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
-                thumbnail_url="https://i.imgur.com/OidhOOU.png",
+                thumbnail_url="https://i.imgur.com/boVVFnQ.png",
                 title="Error",
                 description=f"Peer review size must be smaller than the current number of teams. Use {command.mention} to update the value.",
                 timestamp=True,
