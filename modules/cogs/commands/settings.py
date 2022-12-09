@@ -14,25 +14,6 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="help", description="Instructions on how to setup the bot.")
-    async def help(self, interaction: discord.Interaction) -> None:
-        description = (
-            "To setup the bot:\n\n"
-            "1. Make sure that you have the 'Manage Server' permission. If you don't, please contact your server owner.\n\n"
-            "2. Use the command `/settings role` and mention a role to assign the professor permission to it.\n\n"
-            "3. Use the command `/course manage` to manage your courses if you're an instructor.\n\n"
-            "4. Use the command `/team create` to create a new team.\n\n"
-            "5. Use the command `/team add` to add a student to a team, either by name or by ID."
-        )
-        embed = embeds.make_embed(
-            interaction=interaction,
-            color=discord.Color.blurple(),
-            thumbnail_url="https://i.imgur.com/NBaYHQG.png",
-            title="Help",
-            description=description,
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
     @app_commands.command(name="role", description="Setup the professor role.")
     @app_commands.checks.has_permissions(manage_roles=True)
     async def role(self, interaction: discord.Interaction, role: discord.Role) -> None:
