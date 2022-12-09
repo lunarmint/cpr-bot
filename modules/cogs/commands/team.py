@@ -252,6 +252,44 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.send_message(embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True)
 
     @staticmethod
+    async def edit_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+        view = discord.ui.View()
+        embed = await helpers.course_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return embed, view
+
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
+            command = await helpers.get_command(interaction=interaction, command="team", subcommand_group="rename")
+            embed.description += f"\nTo update your team name, please use {command.mention} instead."
+            return embed, view
+
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id}
+        options = [discord.SelectOption(label=result["name"]) for result in collection.find(query)]
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
+            title="Edit a team",
+            timestamp=True,
+        )
+
+        if not options:
+            embed.description = "It seems that no teams are available at the moment. Please check back later!"
+            return embed, view
+
+        embed.description = "Select a team to edit using the dropdown below."
+        view = discord.ui.View()
+        view.add_item(EditTeamDropdown(options))
+        return embed, view
+
+    @app_commands.command(name="edit", description="Edit a team.")
+    async def edit(self, interaction: discord.Interaction):
+        embed, view = await self.edit_view(interaction)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+    @staticmethod
     async def remove_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
         embed = await helpers.course_check(interaction)
@@ -264,9 +302,8 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id}
-        results = collection.find(query)
+        options = [discord.SelectOption(label=result["name"]) for result in collection.find(query)]
 
-        options = [discord.SelectOption(label=result["name"]) for result in results]
         embed = embeds.make_embed(
             interaction=interaction,
             thumbnail_url="https://i.imgur.com/HcZHHdQ.png",
@@ -634,6 +671,92 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
             timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, ephemeral=True)
+
+
+class EditTeamDropdown(discord.ui.Select):
+    def __init__(self, options: list[discord.SelectOption]):
+        super().__init__()
+        self.options = options
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        edit_team_modal = EditTeamModal(self.values[0])
+        edit_team_modal.title = f"{self.values[0]}"
+        await interaction.response.send_modal(edit_team_modal)
+
+
+class EditTeamModal(discord.ui.Modal, title=None):
+    def __init__(self, name: str) -> None:
+        super().__init__()
+        self.name = name
+        self.new_name = discord.ui.TextInput(
+            label="New Team Name:",
+            default=self.name,
+            required=True,
+            max_length=1024,
+            style=discord.TextStyle.short,
+        )
+
+        self.add_item(self.new_name)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        new_name = self.new_name.value
+        team_collection = database.Database().get_collection("teams")
+        team_query = {"guild_id": interaction.guild_id, "name": self.name}
+        team_result = team_collection.find_one(team_query)
+
+        new_value = {"$set": {"name": new_name}}
+        team_collection.update_one(team_query, new_value)
+
+        team_query = {"guild_id": interaction.guild_id, "peer_review": self.name}
+        new_value = {"$set": {"peer_review.$": new_name}}
+        team_collection.update_many(team_query, new_value)
+
+        channel = interaction.guild.get_channel(team_result["channel_id"])
+        await channel.edit(name=new_name)
+
+        category = channel.category
+        await category.edit(name=new_name)
+
+        await helpers.set_cooldown(interaction=interaction, command="team rename")
+
+        embed = embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.green(),
+            thumbnail_url="https://i.imgur.com/W7VJssL.png",
+            title="Team renamed",
+            description=f"Successfully updated team name from '{self.name}' to '{new_name}'.",
+            timestamp=True,
+        )
+
+        view = discord.ui.View()
+        view.add_item(RemoveTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
+
+    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        log.error(error)
+        embed = embeds.make_embed(
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/M1WQDzo.png",
+            title="Error",
+            description="Oops! Something went wrong. Please try again later!",
+            timestamp=True,
+        )
+
+        view = discord.ui.View()
+        view.add_item(RemoveTeamBackButton())
+        await interaction.response.edit_message(embed=embed, view=view)
+
+
+class EditTeamBackButton(discord.ui.Button):
+    def __init__(self) -> None:
+        super().__init__()
+        self.label = "Go Back"
+        self.style = discord.ButtonStyle.gray
+        self.custom_id = "edit_team_back"
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        embed, view = await TeamCog.edit_view(interaction)
+        await interaction.response.edit_message(embed=embed, view=view)
 
 
 class RemoveTeamDropdown(discord.ui.Select):
