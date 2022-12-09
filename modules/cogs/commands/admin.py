@@ -4,7 +4,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from modules.utils import embeds
+from modules.utils import embeds, helpers
 
 log = logging.getLogger(__name__)
 
@@ -16,12 +16,15 @@ class AdminCog(commands.GroupCog, group_name="admin"):
     sync = app_commands.Group(name="sync", description="Sync commands.")
 
     @sync.command(name="global", description="Sync commands globally.")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def sync_global(self, interaction: discord.Interaction) -> None:
         """
         Does not sync all commands globally, just the ones registered as global.
         """
         await interaction.response.defer(ephemeral=True)
+
+        embed = await helpers.bot_owner_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.followup.send(embed=embed)
 
         synced = await self.bot.tree.sync()
         embed = embeds.make_embed(
@@ -34,12 +37,15 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         await interaction.followup.send(embed=embed)
 
     @sync.command(name="guild", description="Sync commands in the current guild.")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def sync_guild(self, interaction: discord.Interaction) -> None:
         """
         Does not sync all of your commands to that guild, just the ones registered to that guild.
         """
         await interaction.response.defer(ephemeral=True)
+
+        embed = await helpers.bot_owner_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.followup.send(embed=embed)
 
         synced = await self.bot.tree.sync(guild=interaction.guild)
         embed = embeds.make_embed(
@@ -52,13 +58,16 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         await interaction.followup.send(embed=embed)
 
     @sync.command(name="copy", description="Copies all global app commands to current guild and syncs.")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def sync_global_to_guild(self, interaction: discord.Interaction) -> None:
         """
         This will copy the global list of commands in the tree into the list of commands for the specified guild.
         This is not permanent between bot restarts, and it doesn't impact the state of the commands (you still have to sync).
         """
         await interaction.response.defer(ephemeral=True)
+
+        embed = await helpers.bot_owner_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.followup.send(embed=embed)
 
         self.bot.tree.copy_global_to(guild=interaction.guild)
         synced = await self.bot.tree.sync(guild=interaction.guild)
@@ -72,9 +81,12 @@ class AdminCog(commands.GroupCog, group_name="admin"):
         await interaction.followup.send(embed=embed)
 
     @sync.command(name="remove", description="Clears all commands from the current guild target and syncs.")
-    @app_commands.checks.has_permissions(manage_guild=True)
     async def sync_remove(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
+
+        embed = await helpers.bot_owner_check(interaction)
+        if isinstance(embed, discord.Embed):
+            return await interaction.followup.send(embed=embed)
 
         self.bot.tree.clear_commands(guild=interaction.guild)
         await self.bot.tree.sync(guild=interaction.guild)
