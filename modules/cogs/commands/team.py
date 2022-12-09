@@ -37,8 +37,8 @@ class TeamCog(commands.GroupCog, group_name="team"):
             )
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        cursor = team_collection.find()
-        for document in cursor:
+        results = team_collection.find()
+        for document in results:
             if interaction.user.id in document["members"]:
                 embed = embeds.make_embed(
                     interaction=interaction,
@@ -420,16 +420,18 @@ class CreateTeamConfirmButtons(discord.ui.View):
         if not any(role.id == settings_result["role_id"] for role in interaction.user.roles):
             permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
 
-        team_category = await interaction.guild.create_category(name=self.name)
-        team_channel = await interaction.guild.create_text_channel(
-            name=self.name, category=team_category, overwrites=permission
+        category = await interaction.guild.create_category(name=self.name, overwrites=permission)
+        channel = await interaction.guild.create_text_channel(name=self.name, category=category)
+        voice_channel = await interaction.guild.create_voice_channel(
+            name=self.name, category=category, bitrate=96000, overwrites=permission
         )
 
         team_document = {
             "guild_id": interaction.guild_id,
-            "channel_id": team_channel.id,
+            "channel_id": channel.id,
+            "voice_channel_id": voice_channel.id,
             "name": self.name,
-            "members": [],
+            "members": [interaction.user.id],
         }
         team_collection = database.Database().get_collection("teams")
         team_collection.insert_one(team_document)
@@ -503,13 +505,14 @@ class JoinTeamConfirmButtons(discord.ui.View):
 
         if current_team_result:
             channel = interaction.guild.get_channel(current_team_result["channel_id"])
-            await channel.set_permissions(interaction.user, overwrite=None)
+            await channel.category.set_permissions(target=interaction.user, overwrite=None)
+
             current_team_query = {"guild_id": interaction.guild_id, "name": current_team_result["name"]}
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
         channel = interaction.guild.get_channel(new_team_result["channel_id"])
-        await channel.set_permissions(interaction.user, read_messages=True)
+        await channel.category.set_permissions(target=interaction.user, read_messages=True)
 
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
@@ -569,7 +572,7 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         collection.update_one(query, value)
 
         channel = interaction.guild.get_channel(self.channel_id)
-        await channel.set_permissions(interaction.user, overwrite=None)
+        await channel.category.set_permissions(target=interaction.user, overwrite=None)
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -646,6 +649,9 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
         channel = interaction.guild.get_channel(team_result["channel_id"])
         await channel.edit(name=new_name)
 
+        voice_channel = interaction.guild.get_channel(team_result["voice_channel_id"])
+        await voice_channel.edit(name=new_name)
+
         category = channel.category
         await category.edit(name=new_name)
 
@@ -713,6 +719,9 @@ class EditTeamModal(discord.ui.Modal, title=None):
 
         channel = interaction.guild.get_channel(team_result["channel_id"])
         await channel.edit(name=new_name)
+
+        voice_channel = interaction.guild.get_channel(team_result["voice_channel_id"])
+        await voice_channel.edit(name=new_name)
 
         category = channel.category
         await category.edit(name=new_name)
@@ -787,8 +796,10 @@ class RemoveTeamConfirmButtons(discord.ui.View):
         result = collection.find_one(query)
 
         channel = interaction.guild.get_channel(result["channel_id"])
+        for channel in channel.category.channels:
+            await channel.delete()
+
         await channel.category.delete()
-        await channel.delete()
         collection.delete_one(query)
 
         query = {"guild_id": interaction.guild_id}
