@@ -140,6 +140,18 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
         )
 
 
+async def bot_owner_check(interaction: discord.Interaction) -> discord.Embed | None:
+    if not await interaction.client.is_owner(interaction.user):
+        return embeds.make_embed(
+            interaction=interaction,
+            color=discord.Color.red(),
+            thumbnail_url="https://i.imgur.com/boVVFnQ.png",
+            title="Error",
+            description="You must be the bot owner to use this command.",
+            timestamp=True,
+        )
+
+
 async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
     setting_collection = database.Database().get_collection("settings")
     setting_query = {"guild_id": interaction.guild_id}
