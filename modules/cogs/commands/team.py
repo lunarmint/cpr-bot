@@ -422,6 +422,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
         permission = {
             interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
             instructor_role: discord.PermissionOverwrite(read_messages=True),
+            interaction.client.user: discord.PermissionOverwrite(read_messages=True),
         }
 
         embed = await helpers.instructor_check(interaction)
