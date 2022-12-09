@@ -424,7 +424,8 @@ class CreateTeamConfirmButtons(discord.ui.View):
             instructor_role: discord.PermissionOverwrite(read_messages=True),
         }
 
-        if not any(role.id == settings_result["role_id"] for role in interaction.user.roles):
+        embed = await helpers.instructor_check(interaction)
+        if isinstance(embed, discord.Embed):
             permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
 
         category = await interaction.guild.create_category(name=self.name, overwrites=permission)
