@@ -225,10 +225,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        team_collection = database.Database().get_collection("teams")
-        team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
-        team_result = team_collection.find_one(team_query)
-        if team_result is None:
+        collection = database.Database().get_collection("teams")
+        query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        result = collection.find_one(query)
+        if result is None:
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -249,9 +249,7 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 "Your action will also be logged. Do you wish to continue?"
             ),
         )
-        await interaction.response.send_message(
-            embed=embed, view=RenameTeamConfirmButtons(team_result["name"]), ephemeral=True
-        )
+        await interaction.response.send_message(embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True)
 
     @staticmethod
     async def remove_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
