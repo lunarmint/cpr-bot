@@ -27,17 +27,17 @@ However, if you wish to run your own instance of the bot, please continue readin
 - Read Message/View Channels
 - Send Messages
 
-**Step 7:** Copy the content in the `Generated URL` right below. Copy it to your browser's address bar and add the bot to your server.
+**Step 6:** Copy the content in the `Generated URL` right below. Copy it to your browser's address bar and add the bot to your server.
 
-**Step 8:** This web application is made to be built on bare metal Linux environment using Docker. Make sure that the following software are installed:
+**Step 7:** This web application is made to be built on bare metal Linux environment using Docker. Make sure that the following software are installed:
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-**Step 9:** Clone the repository.
+**Step 8:** Clone the repository.
 
-**Step 10:** At the root of the directory, create a `.env` and `config.yml` file using `.env.example` and `config.example.yml` respectively as the templates and fill out the variables.
+**Step 9:** At the root of the directory, create a `.env` and `config.yml` file using `.env.example` and `config.example.yml` respectively as the templates and fill out the variables.
 
-**Step 11:** Navigate to `scripts` and run `sh build-app.sh`.
+**Step 10:** Navigate to `scripts` and run `sh build-app.sh`.
 
 Your bot should be up and running.
 
