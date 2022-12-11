@@ -12,7 +12,7 @@ However, if you wish to run your own instance of the bot, please continue readin
 
 **Step 2:** Select your application and navigate to `Bot` on the left hand side, then `Add Bot` and select a name for your bot.
 
-**Step 3:** Copy the `Token`. This is your bot token will be required by your `config.yml` file (see step 10).
+**Step 3:** Save the `Token`. This is your bot token will be required by your `config.yml` file (see step 10).
 
 **Step 4:** On the left hand side, select `OAuth2` > `URL Generator`.
 
@@ -29,9 +29,7 @@ However, if you wish to run your own instance of the bot, please continue readin
 
 **Step 6:** Copy the content in the `Generated URL` right below. Copy it to your browser's address bar and add the bot to your server.
 
-**Step 7:** This web application is made to be built on bare metal Linux environment using Docker. Make sure that the following software are installed:
-- [Docker](https://docs.docker.com/engine/install/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+**Step 7:** Install [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
 **Step 8:** Clone the repository.
 
