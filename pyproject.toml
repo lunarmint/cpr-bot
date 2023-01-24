@@ -17,7 +17,7 @@ dataset = "1.5.2"
 parsedatetime = "2.6"
 pyaml_env = "1.1.5"
 pymongo = "4.3.3"
-python = "^3.10"
+python = "^3.11"
 python-magic = "0.4.27"
 requests-toolbelt = "0.10.1"
 
