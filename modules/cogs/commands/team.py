@@ -442,6 +442,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             "voice_channel_id": voice_channel.id,
             "name": self.name,
             "members": [] if instructor else [interaction.user.id],
+            "peer_review": [],
         }
         team_collection = database.Database().get_collection("teams")
         team_collection.insert_one(team_document)
