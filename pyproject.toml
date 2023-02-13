@@ -15,14 +15,14 @@ coloredlogs = "15.0.1"
 dataset = "1.5.2"
 "discord.py" = "2.1.0"
 parsedatetime = "2.6"
-pyaml_env = "1.1.5"
+pyaml_env = "1.2.1"
 pymongo = "4.3.3"
 python = "^3.11"
 python-magic = "0.4.27"
 requests-toolbelt = "0.10.1"
 
 [tool.poetry.dev-dependencies]
-black = ">=22.12.0"
+black = ">=23.1.0"
 flake8 = ">=6.0.0"
 python-magic-bin = "^0.4.14"
 
