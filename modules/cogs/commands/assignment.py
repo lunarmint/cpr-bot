@@ -22,6 +22,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
     @staticmethod
     async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+        """Main view of the assignment interface, to be reused by other methods when the "back" button is hit."""
         embed = embeds.make_embed(
             interaction=interaction,
             thumbnail_url="https://i.imgur.com/o2yYOnK.png",
@@ -42,6 +43,8 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         else:
             embed.description = "No assignments are available at the moment. Please check back later!"
 
+        # Disable the edit and remove buttons because an assignment is not yet selected.
+        # All buttons are not displayed if the invoker is not an instructor.
         check = await helpers.instructor_check(interaction)
         if not isinstance(check, discord.Embed):
             edit_assignment_button = EditAssignmentButton()
@@ -58,6 +61,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
     @app_commands.command(name="view", description="View all assignments.")
     async def view(self, interaction: discord.Interaction) -> None:
+        """/assignment view command."""
         embed, view = await self.main_view(interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -65,6 +69,8 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
     async def upload(
         self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment
     ) -> discord.InteractionMessage:
+        """/assignment upload command."""
+        # TODO: Add a file extension check and use a more reliable/faster file host.
         await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
             embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
@@ -110,6 +116,7 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
 
     @upload.autocomplete("assignment")
     async def upload_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        """Autocomplete function to suggest a list of available assignments when its being typed in."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
         assignments = [result["name"] for result in collection.find(query).sort("name")]
@@ -126,6 +133,14 @@ class AssignmentDropdown(discord.ui.Select):
         self.options = options
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """Dropdown callback after an assignment is selected with buttons.
+        View 0 is the dropdown.
+        View 1 is the create assignment button.
+        View 2 is the edit assignment button.
+        View 3 is the remove assignment button.
+        View 4 is the peer review disabled/enabled button.
+        Self value 0 is the currently selected assignment name.
+        """
         await interaction.response.defer()
         await interaction.edit_original_response(
             embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
@@ -142,8 +157,11 @@ class AssignmentDropdown(discord.ui.Select):
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
 
         try:
+            # Re-enable the edit and remove buttons that were disabled earlier at main view.
             self.view.children[2].disabled = False
             self.view.children[3].disabled = False
+
+            # Set the assignment name attribute for the buttons so that we can use them for database query.
             self.view.children[2].assignment_name = self.values[0]
             self.view.children[3].assignment_name = self.values[0]
         except IndexError:

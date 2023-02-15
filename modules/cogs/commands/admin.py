@@ -17,9 +17,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
 
     @sync.command(name="global", description="Sync commands globally.")
     async def sync_global(self, interaction: discord.Interaction) -> None:
-        """
-        Does not sync all commands globally, just the ones registered as global.
-        """
+        """Does not sync all commands globally, just the ones registered as global."""
         await interaction.response.defer(ephemeral=True)
 
         embed = await helpers.bot_owner_check(interaction)
@@ -38,9 +36,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
 
     @sync.command(name="guild", description="Sync commands in the current guild.")
     async def sync_guild(self, interaction: discord.Interaction) -> None:
-        """
-        Does not sync all of your commands to that guild, just the ones registered to that guild.
-        """
+        """Does not sync all of your commands to that guild, just the ones registered to that guild."""
         await interaction.response.defer(ephemeral=True)
 
         embed = await helpers.bot_owner_check(interaction)
@@ -59,8 +55,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
 
     @sync.command(name="copy", description="Copies all global app commands to current guild and syncs.")
     async def sync_global_to_guild(self, interaction: discord.Interaction) -> None:
-        """
-        This will copy the global list of commands in the tree into the list of commands for the specified guild.
+        """Copy the global list of commands in the tree into the list of commands for the specified guild.
         This is not permanent between bot restarts, and it doesn't impact the state of the commands (you still have to sync).
         """
         await interaction.response.defer(ephemeral=True)
@@ -82,6 +77,8 @@ class AdminCog(commands.GroupCog, group_name="admin"):
 
     @sync.command(name="remove", description="Clears all commands from the current guild target and syncs.")
     async def sync_remove(self, interaction: discord.Interaction) -> None:
+        """Remove all commands from the current guild. Using this can cause serious problems and requires
+        intervention with the code by adding a command sync call on bot start to fix it."""
         await interaction.response.defer(ephemeral=True)
 
         embed = await helpers.bot_owner_check(interaction)
@@ -104,6 +101,7 @@ class AdminCog(commands.GroupCog, group_name="admin"):
     @sync_global_to_guild.error
     @sync_remove.error
     async def sync_error(self, interaction: discord.Interaction, error: discord.HTTPException) -> None:
+        """Support method to send a permission error message."""
         log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(
