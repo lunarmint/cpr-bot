@@ -156,7 +156,8 @@ class AssignmentDropdown(discord.ui.Select):
         due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
         duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
 
-        try:
+        embed = await helpers.instructor_check(interaction)
+        if not isinstance(embed, discord.Embed):
             # Re-enable the edit and remove buttons that were disabled earlier at main view.
             self.view.children[2].disabled = False
             self.view.children[3].disabled = False
@@ -164,12 +165,11 @@ class AssignmentDropdown(discord.ui.Select):
             # Set the assignment name attribute for the buttons so that we can use them for database query.
             self.view.children[2].assignment_name = self.values[0]
             self.view.children[3].assignment_name = self.values[0]
-        except IndexError:
-            pass
 
-        embed = await helpers.instructor_check(interaction)
-        if not isinstance(embed, discord.Embed):
             peer_review_button = PeerReviewButton(assignment_name=self.values[0], peer_review=collection.find_one(query)["peer_review"])
+
+            # To prevent new peer review buttons being added to view whenever we select a different assignment, we remove
+            # the existing button and add it again so that it reflects the peer review status of the newly selected assignment.
             if any(children.custom_id in ("peer_review_enabled", "peer_review_disabled") for children in self.view.children):
                 self.view.remove_item(self.view.children[4])
                 self.view.add_item(peer_review_button)
