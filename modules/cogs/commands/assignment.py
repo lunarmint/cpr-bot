@@ -134,12 +134,12 @@ class AssignmentDropdown(discord.ui.Select):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         """Dropdown callback after an assignment is selected with buttons.
-        View 0 is the dropdown.
-        View 1 is the create assignment button.
-        View 2 is the edit assignment button.
-        View 3 is the remove assignment button.
-        View 4 is the peer review disabled/enabled button.
-        Self value 0 is the currently selected assignment name.
+        self.view.children[0] is the dropdown.
+        self.view.children[1] is the create assignment button.
+        self.view.children[2] is the edit assignment button.
+        self.view.children[3] is the remove assignment button.
+        self.view.children[4] is the peer review disabled/enabled button.
+        self.values[0] is the currently selected assignment name.
         """
         await interaction.response.defer()
         await interaction.edit_original_response(
@@ -166,7 +166,9 @@ class AssignmentDropdown(discord.ui.Select):
             self.view.children[2].assignment_name = self.values[0]
             self.view.children[3].assignment_name = self.values[0]
 
-            peer_review_button = PeerReviewButton(assignment_name=self.values[0], peer_review=collection.find_one(query)["peer_review"])
+            peer_review_button = PeerReviewButton(
+                assignment_name=self.values[0], peer_review=collection.find_one(query)["peer_review"]
+            )
 
             # To prevent new peer review buttons being added to view whenever we select a different assignment, we remove
             # the existing button and add it again so that it reflects the peer review status of the newly selected assignment.
@@ -206,6 +208,7 @@ class CreateAssignmentButton(discord.ui.Button):
         self.custom_id = "create_assignment"
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """The callback that sends a modal after the create assignment button is hit."""
         await interaction.response.send_modal(CreateAssignmentModal())
 
 
@@ -218,6 +221,7 @@ class EditAssignmentButton(discord.ui.Button):
         self.assignment_name = None
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """The callback that sends a modal after the edit assignment button is hit."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
         result = collection.find_one(query)
@@ -243,6 +247,7 @@ class RemoveAssignmentButton(discord.ui.Button):
         self.assignment_name = None
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """The callback that edit the message to a warning with confirmation buttons before removing."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
         result = collection.find_one(query)
@@ -278,6 +283,7 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="assignment_confirm")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        """The confirm button to remove an assignment."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.name}
         collection.delete_one(query)
@@ -296,6 +302,7 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="assignment_cancel")
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        """The cancel button to cancel removing an assignment."""
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -347,6 +354,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         self.add_item(self.instructions)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        """The submit button to save all the input values of the new assignment."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name.value}
         result = collection.find_one(query)
@@ -364,6 +372,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
             view.add_item(BackButton())
             return await interaction.response.edit_message(embed=embed, view=view)
 
+        # Cast to int as the modal's input are all strings.
         points = int(self.points.value)
         if points < 0:
             embed = embeds.make_embed(
@@ -379,6 +388,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
             view.add_item(BackButton())
             return await interaction.response.edit_message(embed=embed, view=view)
 
+        # Throw ValueError if Arrow is unable to parse the input due to being incorrectly formatted.
         try:
             time = arrow.Arrow(
                 year=int(self.due_date.value[6:10]),
@@ -446,6 +456,7 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         await interaction.response.edit_message(embed=embed, view=view)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        """To handle errors, just in case."""
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -503,6 +514,8 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         self.add_item(self.instructions)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        """The submit button to save all the new values of the assignment."""
+        # Cast to int as the modal's input are all strings.
         points = int(self.points.value)
         if points < 0:
             embed = embeds.make_embed(
@@ -518,6 +531,7 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
             view.add_item(BackButton())
             return await interaction.response.edit_message(embed=embed, view=view)
 
+        # Throw ValueError if Arrow is unable to parse the input due to being incorrectly formatted.
         try:
             time = arrow.Arrow(
                 year=int(self.due_date.value[6:10]),
@@ -578,6 +592,7 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         await interaction.response.edit_message(embed=embed, view=view)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+        """To handle errors, just in case."""
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -600,6 +615,7 @@ class BackButton(discord.ui.Button):
         self.custom_id = "assignment_back"
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """The callback of the back button, editing the message to the main view."""
         embed, view = await AssignmentCog.main_view(interaction)
         await interaction.response.edit_message(embed=embed, view=view)
 
@@ -614,6 +630,7 @@ class PeerReviewButton(discord.ui.Button):
         self.assignment_name = assignment_name
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        """Button to enable/disable peer review on an assignment."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
 
@@ -636,7 +653,9 @@ class PeerReviewButton(discord.ui.Button):
 
 
 async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str) -> list[str]:
-    def task():
+    """Support method to generate a list of hyperlinks from our uploads in a new thread."""
+
+    def task() -> list:
         root = pathlib.Path(__file__).parents[3]
         file_dir = root.joinpath("uploads", str(interaction.guild_id), "assignments", assignment_name).glob("**/*")
         links = []
