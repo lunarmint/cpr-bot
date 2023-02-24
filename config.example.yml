@@ -1,9 +1,8 @@
 bot:
   token: your_bot_token
-  prefix: "!"
-  status: "your commands!"
-  log_level: "INFO"
-  webhook_url: "https://canary.discord.com/api/webhooks/000000000000000000/xxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  prefix: !
+  status: your commands!
+  log_level: INFO
 database:
   username: !ENV ${MONGO_USERNAME}
   password: !ENV ${MONGO_PASSWORD}
