@@ -23,7 +23,7 @@ requests-toolbelt = "0.10.1"
 [tool.poetry.dev-dependencies]
 black = ">=23.1.0"
 flake8 = ">=6.0.0"
-python-magic-bin = "^0.4.14"
+python-magic-bin = "^0.4.14" # For Windows development environment. Run "pip uninstall python-magic".
 
 [tool.black]
 line-length = 125
