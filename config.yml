@@ -1,8 +1,8 @@
 bot:
-  token: "your_bot_token"
-  prefix: "!"
-  status: "your commands!"
-  log_level: INFO
+  token: ${BOT_TOKEN}
+  prefix: ${BOT_PREFIX}
+  status: ${BOT_STATUS}
+  log_level: ${LOG_LEVEL}
 database:
   username: ${MONGO_USERNAME}
   password: ${MONGO_PASSWORD}

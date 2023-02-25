@@ -152,6 +152,4 @@ cython_debug/
 .idea/
 
 # Project specific
-config.yml
 /uploads
-

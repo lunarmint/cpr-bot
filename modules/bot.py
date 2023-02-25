@@ -11,7 +11,7 @@ from modules.utils.config import config
 
 bot = commands.Bot(
     activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"].get()),
-    command_prefix=config["bot"]["prefix"].get(),
+    command_prefix=config["bot"]["prefix"].as_str_expanded(),
     help_command=None,
     intents=discord.Intents(
         emojis_and_stickers=True,
@@ -38,7 +38,7 @@ async def main() -> None:
     for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
         await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
 
-    await bot.start(config["bot"]["token"].get())
+    await bot.start(config["bot"]["token"].as_str_expanded())
 
 
 if __name__ == "__main__":
