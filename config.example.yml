@@ -1,11 +1,11 @@
 bot:
-  token: your_bot_token
-  prefix: !
-  status: your commands!
+  token: "your_bot_token"
+  prefix: "!"
+  status: "your commands!"
   log_level: INFO
 database:
-  username: !ENV ${MONGO_USERNAME}
-  password: !ENV ${MONGO_PASSWORD}
-  hostname: !ENV ${MONGO_HOSTNAME}
-  port: !ENV ${MONGO_PORT}
-  database_name: !ENV ${MONGO_INITDB_DATABASE}
+  username: ${MONGO_USERNAME}
+  password: ${MONGO_PASSWORD}
+  hostname: ${MONGO_HOSTNAME}
+  port: ${MONGO_PORT}
+  database_name: ${MONGO_INITDB_DATABASE}

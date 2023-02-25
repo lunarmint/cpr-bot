@@ -481,6 +481,21 @@ humanfriendly = ">=9.1"
 cron = ["capturer (>=2.4)"]
 
 [[package]]
+name = "confuse"
+version = "2.0.0"
+description = "Painless YAML configuration."
+category = "main"
+optional = false
+python-versions = ">=3.6, <4"
+files = [
+    {file = "confuse-2.0.0-py3-none-any.whl", hash = "sha256:3c6906a852926af89a0d83fa15a65b2859793ac4fcec61f31e2c1df59d2dead5"},
+    {file = "confuse-2.0.0.tar.gz", hash = "sha256:acc57c45ec2a9850a90fe7c29812bbdd8405e48a49c1a22899df915d0aca941f"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+
+[[package]]
 name = "discord-py"
 version = "2.1.1"
 description = "A Python wrapper for the Discord API"
@@ -809,24 +824,6 @@ files = [
 [package.extras]
 docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx (>=6.1.3)", "sphinx-autodoc-typehints (>=1.22,!=1.23.4)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest (>=7.2.1)", "pytest-cov (>=4)", "pytest-mock (>=3.10)"]
-
-[[package]]
-name = "pyaml-env"
-version = "1.2.1"
-description = "Provides yaml file parsing with environment variable resolution"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pyaml_env-1.2.1-py3-none-any.whl", hash = "sha256:2e7da2d4bba0629711ade1a41864e5e200c84ded896a3d27e9f560fae7311c36"},
-    {file = "pyaml_env-1.2.1.tar.gz", hash = "sha256:6d5dc98c8c82df743a132c196e79963050c9feb05b0a6f25f3ad77771d3d95b0"},
-]
-
-[package.dependencies]
-PyYAML = ">=5.0,<=7.0"
-
-[package.extras]
-test = ["pytest"]
 
 [[package]]
 name = "pycodestyle"
@@ -1238,4 +1235,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8f2935d2bf35c559cb7c83f65400d62203d448766fca544742e1eedfab96e9fc"
+content-hash = "f19297d160ab304e60add0cd7174ce9b379e900eef47d8f5489446663a5db1b9"

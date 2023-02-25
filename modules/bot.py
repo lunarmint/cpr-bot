@@ -10,8 +10,8 @@ import __init__  # noqa
 from modules.utils.config import config
 
 bot = commands.Bot(
-    activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"]),
-    command_prefix=config["bot"]["prefix"],
+    activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"].get()),
+    command_prefix=config["bot"]["prefix"].get(),
     help_command=None,
     intents=discord.Intents(
         emojis_and_stickers=True,
@@ -38,7 +38,7 @@ async def main() -> None:
     for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
         await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
 
-    await bot.start(config["bot"]["token"])
+    await bot.start(config["bot"]["token"].get())
 
 
 if __name__ == "__main__":
