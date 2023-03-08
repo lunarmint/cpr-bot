@@ -33,7 +33,7 @@ However, if you wish to run your own instance of the bot, please continue readin
 
 **Step 8:** Clone the repository.
 
-**Step 9:** At the root of the directory, create a `.env` and `config.yml` file using `.env.example` and `config.example.yml` respectively as the templates and fill out the variables.
+**Step 9:** At the root of the directory, create a `.env` file using `.env_example` as the templates and fill out the variables.
 
 **Step 10:** Navigate to `scripts` and run `sh build-app.sh`.
 
