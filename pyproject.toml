@@ -9,21 +9,21 @@ readme = "README.md"
 repository = "https://github.com/lunarmint/cpr-bot"
 
 [tool.poetry.dependencies]
-arrow = "1.2.3"
-asyncpraw = "7.6.1"
-coloredlogs = "15.0.1"
-confuse = "2.0.0"
-"discord.py" = "2.1.1"
-parsedatetime = "2.6"
-pymongo = "4.3.3"
+arrow = "~1.2.3"
+asyncpraw = "~7.7.0"
+coloredlogs = "~15.0.1"
+confuse = "~2.0.0"
+"discord.py" = "~2.2.2"
+parsedatetime = "~2.6"
+pymongo = "~4.3.3"
 python = "^3.11"
-python-magic = "0.4.27"
-requests-toolbelt = "0.10.1"
+python-magic = "~0.4.27"
+requests-toolbelt = "~0.10.1"
 
 [tool.poetry.dev-dependencies]
 black = ">=23.1.0"
 flake8 = ">=6.0.0"
-python-magic-bin = "^0.4.14" # For Windows development environment. Run "pip uninstall python-magic".
+python-magic-bin = ">=0.4.14" # For Windows development environment. Run "pip uninstall python-magic".
 
 [tool.black]
 line-length = 125
