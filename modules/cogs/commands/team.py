@@ -48,7 +48,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
                     description="You cannot create a new team because you are already in a team.",
                     timestamp=True,
                 )
-                return await interaction.response.send_message(embed=embed, ephemeral=True)
+                return await interaction.response.send_message(
+                    embed=embed, ephemeral=True
+                )
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -57,10 +59,14 @@ class TeamCog(commands.GroupCog, group_name="team"):
             title="Create team",
             description=f"Create a new team with the name '{name}'?",
         )
-        await interaction.response.send_message(embed=embed, view=CreateTeamConfirmButtons(name), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=CreateTeamConfirmButtons(name), ephemeral=True
+        )
 
     @staticmethod
-    async def join_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def join_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
 
         embed = await helpers.course_check(interaction)
@@ -77,7 +83,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         team_collection = database.Database().get_collection("teams")
 
-        current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        current_team_query = {
+            "guild_id": interaction.guild_id,
+            "members": interaction.user.id,
+        }
         current_team_result = team_collection.find_one(current_team_query)
 
         new_team_query = {"guild_id": interaction.guild_id}
@@ -92,7 +101,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 options.append(discord.SelectOption(label=result["name"]))
 
         if not options:
-            command = await helpers.get_command(interaction=interaction, command="team", subcommand_group="view")
+            command = await helpers.get_command(
+                interaction=interaction, command="team", subcommand_group="view"
+            )
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -104,7 +115,12 @@ class TeamCog(commands.GroupCog, group_name="team"):
             return embed, view
 
         view.add_item(
-            JoinTeamDropdown(options=options, current_team=current_team_result["name"] if current_team_result else None)
+            JoinTeamDropdown(
+                options=options,
+                current_team=current_team_result["name"]
+                if current_team_result
+                else None,
+            )
         )
 
         embed = embeds.make_embed(
@@ -156,7 +172,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
         )
         await interaction.response.send_message(
             embed=embed,
-            view=LeaveTeamConfirmButtons(name=team_result["name"], channel_id=team_result["channel_id"]),
+            view=LeaveTeamConfirmButtons(
+                name=team_result["name"], channel_id=team_result["channel_id"]
+            ),
             ephemeral=True,
         )
 
@@ -190,7 +208,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
             embed.description = "No teams were found. Please try again later!"
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        current_team_query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
+        current_team_query = {
+            "guild_id": interaction.guild_id,
+            "members": interaction.user.id,
+        }
         current_team_result = team_collection.find_one(current_team_query)
 
         check = await helpers.instructor_check(interaction)
@@ -199,7 +220,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
         teams = []
         for index, value in enumerate(team_result):
             if instructor:
-                teams.append(f"{index + 1}. {value['name']} ({len(value['members'])}/{settings_result['team_size']})")
+                teams.append(
+                    f"{index + 1}. {value['name']} ({len(value['members'])}/{settings_result['team_size']})"
+                )
                 continue
 
             if len(value["members"]) >= settings_result["team_size"]:
@@ -228,7 +251,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        embed = await helpers.cooldown_check(interaction=interaction, command="team rename")
+        embed = await helpers.cooldown_check(
+            interaction=interaction, command="team rename"
+        )
         if isinstance(embed, discord.Embed):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -256,10 +281,14 @@ class TeamCog(commands.GroupCog, group_name="team"):
                 "Your action will also be logged. Do you wish to continue?"
             ),
         )
-        await interaction.response.send_message(embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=RenameTeamConfirmButtons(result["name"]), ephemeral=True
+        )
 
     @staticmethod
-    async def edit_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def edit_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
@@ -267,13 +296,20 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         embed = await helpers.instructor_check(interaction)
         if isinstance(embed, discord.Embed):
-            command = await helpers.get_command(interaction=interaction, command="team", subcommand_group="rename")
-            embed.description += f"\nTo update your team name, please use {command.mention} instead."
+            command = await helpers.get_command(
+                interaction=interaction, command="team", subcommand_group="rename"
+            )
+            embed.description += (
+                f"\nTo update your team name, please use {command.mention} instead."
+            )
             return embed, view
 
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id}
-        options = [discord.SelectOption(label=result["name"]) for result in collection.find(query)]
+        options = [
+            discord.SelectOption(label=result["name"])
+            for result in collection.find(query)
+        ]
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -297,7 +333,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @staticmethod
-    async def remove_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def remove_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
         embed = await helpers.course_check(interaction)
         if isinstance(embed, discord.Embed):
@@ -309,7 +347,10 @@ class TeamCog(commands.GroupCog, group_name="team"):
 
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id}
-        options = [discord.SelectOption(label=result["name"]) for result in collection.find(query)]
+        options = [
+            discord.SelectOption(label=result["name"])
+            for result in collection.find(query)
+        ]
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -367,7 +408,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
             ),
             footer="Use '/team unlock' if you wish to reverse this action at a later time.",
         )
-        await interaction.response.send_message(embed=embed, view=LockTeamConfirmButtons(), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=LockTeamConfirmButtons(), ephemeral=True
+        )
 
     @app_commands.command(name="unlock", description="Unlock all teams.")
     async def unlock(self, interaction: discord.Interaction):
@@ -404,7 +447,9 @@ class TeamCog(commands.GroupCog, group_name="team"):
             ),
             footer="Use '/team lock' if you wish to reverse this action at a later time.",
         )
-        await interaction.response.send_message(embed=embed, view=UnlockTeamConfirmButtons(), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=UnlockTeamConfirmButtons(), ephemeral=True
+        )
 
 
 class CreateTeamConfirmButtons(discord.ui.View):
@@ -412,15 +457,23 @@ class CreateTeamConfirmButtons(discord.ui.View):
         super().__init__()
         self.name = name
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="create_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm",
+        style=discord.ButtonStyle.green,
+        custom_id="create_team_confirm",
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         settings_result = settings_collection.find_one(settings_query)
 
         instructor_role = interaction.guild.get_role(settings_result["role_id"])
         permission = {
-            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            interaction.guild.default_role: discord.PermissionOverwrite(
+                read_messages=False
+            ),
             instructor_role: discord.PermissionOverwrite(read_messages=True),
             interaction.client.user: discord.PermissionOverwrite(read_messages=True),
         }
@@ -428,10 +481,16 @@ class CreateTeamConfirmButtons(discord.ui.View):
         embed = await helpers.instructor_check(interaction)
         instructor = False if isinstance(embed, discord.Embed) else True
         if not instructor:
-            permission[interaction.user] = discord.PermissionOverwrite(read_messages=True)
+            permission[interaction.user] = discord.PermissionOverwrite(
+                read_messages=True
+            )
 
-        category = await interaction.guild.create_category(name=self.name, overwrites=permission)
-        channel = await interaction.guild.create_text_channel(name=self.name, category=category)
+        category = await interaction.guild.create_category(
+            name=self.name, overwrites=permission
+        )
+        channel = await interaction.guild.create_text_channel(
+            name=self.name, category=category
+        )
         voice_channel = await interaction.guild.create_voice_channel(
             name=self.name, category=category, bitrate=96000, overwrites=permission
         )
@@ -457,8 +516,12 @@ class CreateTeamConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="create_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="create_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -471,7 +534,9 @@ class CreateTeamConfirmButtons(discord.ui.View):
 
 
 class JoinTeamDropdown(discord.ui.Select):
-    def __init__(self, options: list[discord.SelectOption], current_team: str = None) -> None:
+    def __init__(
+        self, options: list[discord.SelectOption], current_team: str = None
+    ) -> None:
         super().__init__()
         self.options = options
         self.current_team = current_team
@@ -494,7 +559,9 @@ class JoinTeamDropdown(discord.ui.Select):
 
         await interaction.response.edit_message(
             embed=embed,
-            view=JoinTeamConfirmButtons(current_team=self.current_team, new_team=self.values[0]),
+            view=JoinTeamConfirmButtons(
+                current_team=self.current_team, new_team=self.values[0]
+            ),
         )
 
 
@@ -504,11 +571,18 @@ class JoinTeamConfirmButtons(discord.ui.View):
         self.current_team = current_team
         self.new_team = new_team
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="join_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="join_team_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("teams")
 
-        current_team_query = {"guild_id": interaction.guild_id, "name": self.current_team}
+        current_team_query = {
+            "guild_id": interaction.guild_id,
+            "name": self.current_team,
+        }
         current_team_result = collection.find_one(current_team_query)
 
         new_team_query = {"guild_id": interaction.guild_id, "name": self.new_team}
@@ -516,14 +590,21 @@ class JoinTeamConfirmButtons(discord.ui.View):
 
         if current_team_result:
             channel = interaction.guild.get_channel(current_team_result["channel_id"])
-            await channel.category.set_permissions(target=interaction.user, overwrite=None)
+            await channel.category.set_permissions(
+                target=interaction.user, overwrite=None
+            )
 
-            current_team_query = {"guild_id": interaction.guild_id, "name": current_team_result["name"]}
+            current_team_query = {
+                "guild_id": interaction.guild_id,
+                "name": current_team_result["name"],
+            }
             current_team_value = {"$pull": {"members": interaction.user.id}}
             collection.update_one(current_team_query, current_team_value)
 
         channel = interaction.guild.get_channel(new_team_result["channel_id"])
-        await channel.category.set_permissions(target=interaction.user, read_messages=True)
+        await channel.category.set_permissions(
+            target=interaction.user, read_messages=True
+        )
 
         new_team_value = {"$push": {"members": interaction.user.id}}
         collection.update_one(new_team_query, new_team_value)
@@ -541,8 +622,12 @@ class JoinTeamConfirmButtons(discord.ui.View):
         view.add_item(JoinTeamBackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="join_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="join_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -575,8 +660,12 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         self.name = name
         self.channel_id = channel_id
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="leave_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="leave_team_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id, "members": interaction.user.id}
         value = {"$pull": {"members": interaction.user.id}}
@@ -595,8 +684,12 @@ class LeaveTeamConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="leave_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="leave_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -613,12 +706,22 @@ class RenameTeamConfirmButtons(discord.ui.View):
         super().__init__()
         self.name = name
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="rename_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm",
+        style=discord.ButtonStyle.green,
+        custom_id="rename_team_confirm",
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         await interaction.response.send_modal(RenameTeamModal(self.name))
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="rename_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="rename_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -678,7 +781,9 @@ class RenameTeamModal(discord.ui.Modal, title="Rename Team"):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -752,7 +857,9 @@ class EditTeamModal(discord.ui.Modal, title=None):
         view.add_item(RemoveTeamBackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -792,7 +899,9 @@ class RemoveTeamDropdown(discord.ui.Select):
             title="Warning",
             description=f"You are about to remove the team '{self.values[0]}'. This action is **irreversible**. Do you wish to continue?",
         )
-        await interaction.response.edit_message(embed=embed, view=RemoveTeamConfirmButtons(self.values[0]))
+        await interaction.response.edit_message(
+            embed=embed, view=RemoveTeamConfirmButtons(self.values[0])
+        )
 
 
 class RemoveTeamConfirmButtons(discord.ui.View):
@@ -800,8 +909,14 @@ class RemoveTeamConfirmButtons(discord.ui.View):
         super().__init__()
         self.name = name
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="remove_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm",
+        style=discord.ButtonStyle.green,
+        custom_id="remove_team_confirm",
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id, "name": self.name}
         result = collection.find_one(query)
@@ -830,8 +945,12 @@ class RemoveTeamConfirmButtons(discord.ui.View):
         view.add_item(RemoveTeamBackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="remove_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="remove_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -862,8 +981,12 @@ class LockTeamConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__()
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="lock_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="lock_team_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         new_value = {"$set": {"teams_locked": True}}
@@ -872,7 +995,9 @@ class LockTeamConfirmButtons(discord.ui.View):
         team_collection = database.Database().get_collection("teams")
         team_query = {"guild_id": interaction.guild_id}
         team_results = team_collection.find(team_query)
-        team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
+        team_list = [
+            f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)
+        ]
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
             interaction=interaction,
@@ -884,8 +1009,12 @@ class LockTeamConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="lock_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="lock_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -901,8 +1030,14 @@ class UnlockTeamConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__()
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="unlock_team_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm",
+        style=discord.ButtonStyle.green,
+        custom_id="unlock_team_confirm",
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         settings_collection = database.Database().get_collection("settings")
         settings_query = {"guild_id": interaction.guild_id}
         new_value = {"$set": {"teams_locked": False}}
@@ -911,7 +1046,9 @@ class UnlockTeamConfirmButtons(discord.ui.View):
         team_collection = database.Database().get_collection("teams")
         team_query = {"guild_id": interaction.guild_id}
         team_results = team_collection.find(team_query)
-        team_list = [f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)]
+        team_list = [
+            f"{index + 1}. {value['name']}" for index, value in enumerate(team_results)
+        ]
         team_names = "\n".join(team_list)
         embed = embeds.make_embed(
             interaction=interaction,
@@ -923,8 +1060,12 @@ class UnlockTeamConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="unlock_team_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="unlock_team_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),

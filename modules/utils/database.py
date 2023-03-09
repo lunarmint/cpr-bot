@@ -13,13 +13,19 @@ log = logging.getLogger(__name__)
 class Database:
     def __init__(self) -> None:
         # Username and password must be escaped according to RFC 3986, use urllib.parse.quote_plus.
-        self.username = urllib.parse.quote_plus(config["database"]["username"].as_str_expanded())
-        self.password = urllib.parse.quote_plus(config["database"]["password"].as_str_expanded())
+        self.username = urllib.parse.quote_plus(
+            config["database"]["username"].as_str_expanded()
+        )
+        self.password = urllib.parse.quote_plus(
+            config["database"]["password"].as_str_expanded()
+        )
         self.hostname = config["database"]["hostname"].as_str_expanded()
         self.port = config["database"]["port"].as_str_expanded()
         self.database_name = config["database"]["database_name"].as_str_expanded()
 
-        if not all([self.hostname, self.port, self.username, self.password, self.database_name]):
+        if not all(
+            [self.hostname, self.port, self.username, self.password, self.database_name]
+        ):
             log.error("One or more database connection variables are missing.")
             raise SystemExit
 

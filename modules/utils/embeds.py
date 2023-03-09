@@ -28,7 +28,9 @@ def make_embed(
         embed.set_author(icon_url=ctx.author.display_avatar, name=ctx.author.name)
 
     if interaction:
-        embed.set_author(icon_url=interaction.user.display_avatar, name=interaction.user.name)
+        embed.set_author(
+            icon_url=interaction.user.display_avatar, name=interaction.user.name
+        )
 
     if isinstance(color, int | discord.colour.Colour):
         embed.colour = color
@@ -45,7 +47,9 @@ def make_embed(
     if isinstance(timestamp, bool):
         embed.timestamp = discord.utils.utcnow() if timestamp else None
     elif isinstance(timestamp, int):
-        embed.timestamp = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        embed.timestamp = datetime.datetime.fromtimestamp(
+            timestamp, tz=datetime.timezone.utc
+        )
     elif isinstance(timestamp, datetime.datetime):
         embed.timestamp = timestamp
 

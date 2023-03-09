@@ -21,7 +21,9 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         self.bot = bot
 
     @staticmethod
-    async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def main_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         embed = embeds.make_embed(
             interaction=interaction,
             thumbnail_url="https://i.imgur.com/o2yYOnK.png",
@@ -32,7 +34,9 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
         assignments = [item for item in collection.find(query).sort("name")]
-        options = [discord.SelectOption(label=assignment["name"]) for assignment in assignments]
+        options = [
+            discord.SelectOption(label=assignment["name"]) for assignment in assignments
+        ]
 
         view = discord.ui.View()
 
@@ -40,7 +44,9 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
             embed.description = "Use the dropdown below to select an assignment and view your submissions."
             view.add_item(SubmissionDropdown(options=options))
         else:
-            embed.description = "No assignments are available at the moment. Please check back later!"
+            embed.description = (
+                "No assignments are available at the moment. Please check back later!"
+            )
 
         return embed, view
 
@@ -51,11 +57,16 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
 
     @app_commands.command(name="upload", description="Submit an assignment.")
     async def upload(
-        self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment
+        self,
+        interaction: discord.Interaction,
+        assignment: str,
+        attachment: discord.Attachment,
     ) -> discord.InteractionMessage:
         await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Uploading...*"
+            )
         )
 
         embed = await helpers.team_check(interaction)
@@ -96,7 +107,13 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         file_dir = (
             pathlib.Path(__file__)
             .parents[3]
-            .joinpath("uploads", str(interaction.guild_id), "submissions", team_result["name"], assignment)
+            .joinpath(
+                "uploads",
+                str(interaction.guild_id),
+                "submissions",
+                team_result["name"],
+                assignment,
+            )
         )
         file_dir.mkdir(parents=True, exist_ok=True)
 
@@ -115,12 +132,16 @@ class SubmissionCog(commands.GroupCog, group_name="submission"):
         await interaction.edit_original_response(embed=embed)
 
     @upload.autocomplete("assignment")
-    async def upload_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+    async def upload_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
         current_timestamp = arrow.Arrow.utcnow().timestamp()
         assignments = [
-            result["name"] for result in collection.find(query).sort("name") if current_timestamp <= result["due_date"]
+            result["name"]
+            for result in collection.find(query).sort("name")
+            if current_timestamp <= result["due_date"]
         ]
         return [
             app_commands.Choice(name=assignment, value=assignment)
@@ -137,7 +158,10 @@ class SubmissionDropdown(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Loading...*"
+            ),
+            view=None,
         )
 
         assignment_collection = database.Database().get_collection("assignments")
@@ -151,7 +175,11 @@ class SubmissionDropdown(discord.ui.Select):
         def task() -> list[str]:
             root = pathlib.Path(__file__).parents[3]
             file_dir = root.joinpath(
-                "uploads", str(interaction.guild_id), "submissions", team_result["name"], self.values[0]
+                "uploads",
+                str(interaction.guild_id),
+                "submissions",
+                team_result["name"],
+                self.values[0],
             ).glob("**/*")
             links = []
             for item in file_dir:
@@ -161,7 +189,11 @@ class SubmissionDropdown(discord.ui.Select):
                 file = item.open(mode="rb")
                 mime_type = magic.from_buffer(file.read(2048), mime=True)
                 file.seek(0)
-                fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
+                fields = {
+                    "time": "1h",
+                    "reqtype": "fileupload",
+                    "fileToUpload": (item.name, file, mime_type),
+                }
                 encoder = MultipartEncoder(fields=fields)
                 response = requests.post(
                     url="https://litterbox.catbox.moe/resources/internals/api.php",
@@ -174,8 +206,12 @@ class SubmissionDropdown(discord.ui.Select):
         hyperlinks_list = await asyncio.to_thread(task)
         hyperlinks = "\n".join(hyperlinks_list)
 
-        due_date = arrow.Arrow.fromtimestamp(assignment_result["due_date"], tzinfo="EST")
-        duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
+        due_date = arrow.Arrow.fromtimestamp(
+            assignment_result["due_date"], tzinfo="EST"
+        )
+        duration_string = (
+            f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
+        )
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -183,10 +219,22 @@ class SubmissionDropdown(discord.ui.Select):
             title="Assignments",
             description="Use the dropdown below to select an assignment and view your submissions.",
             fields=[
-                {"name": "Assignment Name:", "value": assignment_result["name"], "inline": False},
-                {"name": "Points Possible:", "value": assignment_result["points"], "inline": False},
+                {
+                    "name": "Assignment Name:",
+                    "value": assignment_result["name"],
+                    "inline": False,
+                },
+                {
+                    "name": "Points Possible:",
+                    "value": assignment_result["points"],
+                    "inline": False,
+                },
                 {"name": "Due Date:", "value": duration_string, "inline": False},
-                {"name": "Instructions:", "value": assignment_result["instructions"], "inline": False},
+                {
+                    "name": "Instructions:",
+                    "value": assignment_result["instructions"],
+                    "inline": False,
+                },
                 {
                     "name": "Your Submissions:",
                     "value": f"{hyperlinks if hyperlinks else None}",

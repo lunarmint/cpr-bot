@@ -21,7 +21,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         self.bot = bot
 
     @staticmethod
-    async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def main_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         """Main view of the assignment interface, to be reused by other methods when the "back" button is hit."""
         embed = embeds.make_embed(
             interaction=interaction,
@@ -33,7 +35,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
         assignments = [item for item in collection.find(query).sort("name")]
-        options = [discord.SelectOption(label=assignment["name"]) for assignment in assignments]
+        options = [
+            discord.SelectOption(label=assignment["name"]) for assignment in assignments
+        ]
 
         view = discord.ui.View()
 
@@ -41,7 +45,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
             embed.description = "Use the dropdown below to select an assignment."
             view.add_item(AssignmentDropdown(options=options))
         else:
-            embed.description = "No assignments are available at the moment. Please check back later!"
+            embed.description = (
+                "No assignments are available at the moment. Please check back later!"
+            )
 
         # Disable the edit and remove buttons because an assignment is not yet selected.
         # All buttons are not displayed if the invoker is not an instructor.
@@ -65,15 +71,22 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         embed, view = await self.main_view(interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-    @app_commands.command(name="upload", description="Upload an attachment for an assignment.")
+    @app_commands.command(
+        name="upload", description="Upload an attachment for an assignment."
+    )
     async def upload(
-        self, interaction: discord.Interaction, assignment: str, attachment: discord.Attachment
+        self,
+        interaction: discord.Interaction,
+        assignment: str,
+        attachment: discord.Attachment,
     ) -> discord.InteractionMessage:
         """/assignment upload command."""
         # TODO: Add a file extension check and use a more reliable/faster file host.
         await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Uploading...*")
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Uploading...*"
+            )
         )
 
         embed = await helpers.instructor_check(interaction)
@@ -96,7 +109,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
             return await interaction.edit_original_response(embed=embed)
 
         file_dir = (
-            pathlib.Path(__file__).parents[3].joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
+            pathlib.Path(__file__)
+            .parents[3]
+            .joinpath("uploads", str(interaction.guild_id), "assignments", assignment)
         )
         file_dir.mkdir(parents=True, exist_ok=True)
 
@@ -115,7 +130,9 @@ class AssignmentCog(commands.GroupCog, group_name="assignment"):
         await interaction.edit_original_response(embed=embed)
 
     @upload.autocomplete("assignment")
-    async def upload_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+    async def upload_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
         """Autocomplete function to suggest a list of available assignments when its being typed in."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
@@ -143,18 +160,25 @@ class AssignmentDropdown(discord.ui.Select):
         """
         await interaction.response.defer()
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Loading...*"
+            ),
+            view=None,
         )
 
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.values[0]}
         result = collection.find_one(query)
 
-        hyperlinks_list = await get_hyperlinks(interaction=interaction, assignment_name=result["name"])
+        hyperlinks_list = await get_hyperlinks(
+            interaction=interaction, assignment_name=result["name"]
+        )
         hyperlinks = "\n".join(hyperlinks_list)
 
         due_date = arrow.Arrow.fromtimestamp(result["due_date"], tzinfo="EST")
-        duration_string = f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
+        duration_string = (
+            f"{due_date.format('MM/DD/YYYY, hh:mmA')} ({due_date.tzname()})"
+        )
 
         embed = await helpers.instructor_check(interaction)
         if not isinstance(embed, discord.Embed):
@@ -167,12 +191,16 @@ class AssignmentDropdown(discord.ui.Select):
             self.view.children[3].assignment_name = self.values[0]
 
             peer_review_button = PeerReviewButton(
-                assignment_name=self.values[0], peer_review=collection.find_one(query)["peer_review"]
+                assignment_name=self.values[0],
+                peer_review=collection.find_one(query)["peer_review"],
             )
 
             # To prevent new peer review buttons being added to view whenever we select a different assignment, we remove
             # the existing button and add it again so that it reflects the peer review status of the newly selected assignment.
-            if any(children.custom_id in ("peer_review_enabled", "peer_review_disabled") for children in self.view.children):
+            if any(
+                children.custom_id in ("peer_review_enabled", "peer_review_disabled")
+                for children in self.view.children
+            ):
                 self.view.remove_item(self.view.children[4])
                 self.view.add_item(peer_review_button)
             else:
@@ -185,9 +213,17 @@ class AssignmentDropdown(discord.ui.Select):
             description="Use the dropdown below to select an assignment.",
             fields=[
                 {"name": "Assignment Name:", "value": result["name"], "inline": False},
-                {"name": "Points Possible:", "value": result["points"], "inline": False},
+                {
+                    "name": "Points Possible:",
+                    "value": result["points"],
+                    "inline": False,
+                },
                 {"name": "Due Date:", "value": duration_string, "inline": False},
-                {"name": "Instructions:", "value": result["instructions"], "inline": False},
+                {
+                    "name": "Instructions:",
+                    "value": result["instructions"],
+                    "inline": False,
+                },
                 {
                     "name": "Attachment:",
                     "value": f"{hyperlinks if hyperlinks else None}",
@@ -252,7 +288,9 @@ class RemoveAssignmentButton(discord.ui.Button):
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name}
         result = collection.find_one(query)
 
-        hyperlinks_list = await get_hyperlinks(interaction=interaction, assignment_name=result["name"])
+        hyperlinks_list = await get_hyperlinks(
+            interaction=interaction, assignment_name=result["name"]
+        )
         hyperlinks = "\n".join(hyperlinks_list)
 
         embed = embeds.make_embed(
@@ -263,9 +301,17 @@ class RemoveAssignmentButton(discord.ui.Button):
             description="This action is **irreversible**. Please confirm that you want to delete the following assignment:",
             fields=[
                 {"name": "Assignment Name:", "value": result["name"], "inline": False},
-                {"name": "Points Possible:", "value": result["points"], "inline": False},
+                {
+                    "name": "Points Possible:",
+                    "value": result["points"],
+                    "inline": False,
+                },
                 {"name": "Due Date:", "value": result["due_date"], "inline": False},
-                {"name": "Instructions:", "value": result["instructions"], "inline": False},
+                {
+                    "name": "Instructions:",
+                    "value": result["instructions"],
+                    "inline": False,
+                },
                 {
                     "name": "Attachment:",
                     "value": f"{hyperlinks if hyperlinks else None}",
@@ -273,7 +319,9 @@ class RemoveAssignmentButton(discord.ui.Button):
                 },
             ],
         )
-        await interaction.response.edit_message(embed=embed, view=RemoveAssignmentConfirmButtons(self.assignment_name))
+        await interaction.response.edit_message(
+            embed=embed, view=RemoveAssignmentConfirmButtons(self.assignment_name)
+        )
 
 
 class RemoveAssignmentConfirmButtons(discord.ui.View):
@@ -281,8 +329,12 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
         super().__init__()
         self.name = name
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="assignment_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="assignment_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         """The confirm button to remove an assignment."""
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.name}
@@ -300,8 +352,12 @@ class RemoveAssignmentConfirmButtons(discord.ui.View):
         view.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="assignment_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="assignment_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         """The cancel button to cancel removing an assignment."""
         embed = embeds.make_embed(
             interaction=interaction,
@@ -358,7 +414,10 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id, "name": self.assignment_name.value}
         result = collection.find_one(query)
-        if result and result["name"] in (self.assignment_name.value, self.assignment_name.value.lower()):
+        if result and result["name"] in (
+            self.assignment_name.value,
+            self.assignment_name.value.lower(),
+        ):
             embed = embeds.make_embed(
                 interaction=interaction,
                 color=discord.Color.red(),
@@ -427,7 +486,9 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
         }
         collection.insert_one(document)
 
-        upload_command = await helpers.get_command(interaction=interaction, command="assignment", subcommand_group="upload")
+        upload_command = await helpers.get_command(
+            interaction=interaction, command="assignment", subcommand_group="upload"
+        )
 
         embed = embeds.make_embed(
             interaction=interaction,
@@ -436,10 +497,22 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
             title="Assignment created",
             description="Successfully created a new assignment:",
             fields=[
-                {"name": "Assignment Name:", "value": self.assignment_name.value, "inline": False},
+                {
+                    "name": "Assignment Name:",
+                    "value": self.assignment_name.value,
+                    "inline": False,
+                },
                 {"name": "Points Possible:", "value": points, "inline": False},
-                {"name": "Due Date:", "value": f"{time.format('MM/DD/YYYY, hh:mmA')} ({time.tzname()})", "inline": False},
-                {"name": "Instructions:", "value": self.instructions.value, "inline": False},
+                {
+                    "name": "Due Date:",
+                    "value": f"{time.format('MM/DD/YYYY, hh:mmA')} ({time.tzname()})",
+                    "inline": False,
+                },
+                {
+                    "name": "Instructions:",
+                    "value": self.instructions.value,
+                    "inline": False,
+                },
                 {
                     "name": "Attachment:",
                     "value": f"Use the command {upload_command.mention} to create an attachment for this assignment.",
@@ -452,10 +525,16 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
 
         view = discord.ui.View()
         view.add_item(BackButton())
-        view.add_item(PeerReviewButton(assignment_name=self.assignment_name.value, peer_review=False))
+        view.add_item(
+            PeerReviewButton(
+                assignment_name=self.assignment_name.value, peer_review=False
+            )
+        )
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         """To handle errors, just in case."""
         log.error(error)
         embed = embeds.make_embed(
@@ -473,7 +552,9 @@ class CreateAssignmentModal(discord.ui.Modal, title="Create Assignment"):
 
 
 class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
-    def __init__(self, name: str, points: int, due_date: str, instructions: str) -> None:
+    def __init__(
+        self, name: str, points: int, due_date: str, instructions: str
+    ) -> None:
         super().__init__()
         self.name = discord.ui.TextInput(
             label="Assignment Name:",
@@ -580,9 +661,21 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
             description="Successfully updated an assignment:",
             fields=[
                 {"name": "Assignment Name:", "value": self.name.value, "inline": False},
-                {"name": "Points Possible:", "value": self.points.value, "inline": False},
-                {"name": "Due Date:", "value": f"{time.format('MM/DD/YYYY, hh:mmA')} ({time.tzname()})", "inline": False},
-                {"name": "Instructions:", "value": self.instructions.value, "inline": False},
+                {
+                    "name": "Points Possible:",
+                    "value": self.points.value,
+                    "inline": False,
+                },
+                {
+                    "name": "Due Date:",
+                    "value": f"{time.format('MM/DD/YYYY, hh:mmA')} ({time.tzname()})",
+                    "inline": False,
+                },
+                {
+                    "name": "Instructions:",
+                    "value": self.instructions.value,
+                    "inline": False,
+                },
             ],
             timestamp=True,
         )
@@ -591,7 +684,9 @@ class EditAssignmentModal(discord.ui.Modal, title="Edit Assignment"):
         view.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         """To handle errors, just in case."""
         log.error(error)
         embed = embeds.make_embed(
@@ -625,8 +720,12 @@ class PeerReviewButton(discord.ui.Button):
         super().__init__()
         self.peer_review = peer_review
         self.label = "Peer Review Enabled" if peer_review else "Peer Review Disabled"
-        self.style = discord.ButtonStyle.green if peer_review else discord.ButtonStyle.red
-        self.custom_id = "peer_review_enabled" if peer_review else "peer_review_disabled"
+        self.style = (
+            discord.ButtonStyle.green if peer_review else discord.ButtonStyle.red
+        )
+        self.custom_id = (
+            "peer_review_enabled" if peer_review else "peer_review_disabled"
+        )
         self.assignment_name = assignment_name
 
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -649,15 +748,21 @@ class PeerReviewButton(discord.ui.Button):
 
         collection.update_one(query, new_value)
 
-        await interaction.response.edit_message(embed=interaction.message.embeds[0], view=self.view)
+        await interaction.response.edit_message(
+            embed=interaction.message.embeds[0], view=self.view
+        )
 
 
-async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str) -> list[str]:
+async def get_hyperlinks(
+    interaction: discord.Interaction, assignment_name: str
+) -> list[str]:
     """Support method to generate a list of hyperlinks from our uploads in a new thread."""
 
     def task() -> list:
         root = pathlib.Path(__file__).parents[3]
-        file_dir = root.joinpath("uploads", str(interaction.guild_id), "assignments", assignment_name).glob("**/*")
+        file_dir = root.joinpath(
+            "uploads", str(interaction.guild_id), "assignments", assignment_name
+        ).glob("**/*")
         links = []
         for item in file_dir:
             if not item.is_file():
@@ -666,7 +771,11 @@ async def get_hyperlinks(interaction: discord.Interaction, assignment_name: str)
             file = item.open(mode="rb")
             mime_type = magic.from_buffer(file.read(2048), mime=True)
             file.seek(0)
-            fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
+            fields = {
+                "time": "1h",
+                "reqtype": "fileupload",
+                "fileToUpload": (item.name, file, mime_type),
+            }
             encoder = MultipartEncoder(fields=fields)
             response = requests.post(
                 url="https://litterbox.catbox.moe/resources/internals/api.php",

@@ -36,10 +36,14 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             embed.title = "Role update"
             embed.description = f"Are you sure you want to assign instructor permission to the role {role.mention}?"
 
-        await interaction.response.send_message(embed=embed, view=RoleConfirmButtons(role, result), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=RoleConfirmButtons(role, result), ephemeral=True
+        )
 
     @role.error
-    async def role_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def role_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         if isinstance(error, discord.app_commands.errors.MissingPermissions):
             embed = embeds.make_embed(
@@ -79,7 +83,9 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             description="Use the dropdown below to select a command and set a cooldown for it.",
         )
         cooldown_results = cooldown_collection.find(cooldown_query)
-        options = [discord.SelectOption(label=result["command"]) for result in cooldown_results]
+        options = [
+            discord.SelectOption(label=result["command"]) for result in cooldown_results
+        ]
         view = discord.ui.View()
         view.add_item(CooldownDropdown(options))
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
@@ -103,7 +109,9 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             title="Team size update",
             description=f"Update the team size limit from **{result['team_size']}** to **{size}**?",
         )
-        await interaction.response.send_message(embed=embed, view=TeamSizeConfirmButtons(size), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=TeamSizeConfirmButtons(size), ephemeral=True
+        )
 
     peer_review = app_commands.Group(name="peer", description="Peer review settings.")
 
@@ -124,7 +132,9 @@ class SettingsCog(commands.GroupCog, group_name="settings"):
             title="Team size update",
             description=f"Update the peer review size per team from **{result['peer_review_size']}** to **{size}**?",
         )
-        await interaction.response.send_message(embed=embed, view=PeerReviewSizeConfirmButtons(size), ephemeral=True)
+        await interaction.response.send_message(
+            embed=embed, view=PeerReviewSizeConfirmButtons(size), ephemeral=True
+        )
 
 
 class RoleConfirmButtons(discord.ui.View):
@@ -133,8 +143,12 @@ class RoleConfirmButtons(discord.ui.View):
         self.role = role
         self.result = result
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="role_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="role_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
         if self.result:
@@ -159,8 +173,12 @@ class RoleConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="role_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="role_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -176,8 +194,12 @@ class TeamSizeConfirmButtons(discord.ui.View):
         super().__init__()
         self.size = size
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="team_size_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="team_size_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
         new_value = {"$set": {"team_size": self.size}}
@@ -192,8 +214,12 @@ class TeamSizeConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="team_size_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="team_size_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -209,8 +235,14 @@ class PeerReviewSizeConfirmButtons(discord.ui.View):
         super().__init__()
         self.size = size
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="peer_review_size_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm",
+        style=discord.ButtonStyle.green,
+        custom_id="peer_review_size_confirm",
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("settings")
         query = {"guild_id": interaction.guild_id}
         new_value = {"$set": {"peer_review_size": self.size}}
@@ -225,8 +257,14 @@ class PeerReviewSizeConfirmButtons(discord.ui.View):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="peer_review_size_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel",
+        style=discord.ButtonStyle.red,
+        custom_id="peer_review_size_cancel",
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -316,7 +354,9 @@ class CooldownModal(discord.ui.Modal, title="Cooldown"):
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),

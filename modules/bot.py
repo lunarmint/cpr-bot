@@ -10,7 +10,9 @@ import __init__  # noqa
 from modules.utils.config import config
 
 bot = commands.Bot(
-    activity=discord.Activity(type=discord.ActivityType.listening, name=config["bot"]["status"].get()),
+    activity=discord.Activity(
+        type=discord.ActivityType.listening, name=config["bot"]["status"].get()
+    ),
     command_prefix=config["bot"]["prefix"].as_str_expanded(),
     help_command=None,
     intents=discord.Intents(
@@ -35,8 +37,12 @@ async def on_ready() -> None:
 
 
 async def main() -> None:
-    for cog in glob.iglob(os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True):
-        await bot.load_extension(cog.replace("/", ".").replace("\\", ".").replace(".py", ""))
+    for cog in glob.iglob(
+        os.path.join("cogs", "**", "[!^_]*.py"), root_dir="modules", recursive=True
+    ):
+        await bot.load_extension(
+            cog.replace("/", ".").replace("\\", ".").replace(".py", "")
+        )
 
     await bot.start(config["bot"]["token"].as_str_expanded())
 

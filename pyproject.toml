@@ -26,7 +26,7 @@ flake8 = ">=6.0.0"
 python-magic-bin = ">=0.4.14" # For Windows development environment. Run "pip uninstall python-magic".
 
 [tool.black]
-line-length = 125
+line-length = 88
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

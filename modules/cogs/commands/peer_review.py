@@ -51,7 +51,10 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
 
         if peer_review_size >= len(teams):
             command = await helpers.get_command(
-                interaction=interaction, command="settings", subcommand_group="peer", subcommand="review"
+                interaction=interaction,
+                command="settings",
+                subcommand_group="peer",
+                subcommand="review",
             )
             embed = embeds.make_embed(
                 interaction=interaction,
@@ -70,7 +73,8 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             peer_reviews[value] = [teams[i % len(teams)] for i in reviews_index]
 
         peer_reviews_list = [
-            f"{index + 1}. {key}: {', '.join(value)}\n" for index, (key, value) in enumerate(peer_reviews.items())
+            f"{index + 1}. {key}: {', '.join(value)}\n"
+            for index, (key, value) in enumerate(peer_reviews.items())
         ]
         peer_review_string = "".join(peer_reviews_list)
 
@@ -89,12 +93,16 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
 
         await interaction.response.send_message(
             embed=embed,
-            view=DistributeConfirmButtons(peer_reviews=peer_reviews, peer_review_string=peer_review_string),
+            view=DistributeConfirmButtons(
+                peer_reviews=peer_reviews, peer_review_string=peer_review_string
+            ),
             ephemeral=True,
         )
 
     @staticmethod
-    async def grade_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def grade_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         view = discord.ui.View()
 
         team_collection = database.Database().get_collection("teams")
@@ -121,13 +129,20 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             assignment_options = [
                 discord.SelectOption(label=assignment["name"])
                 for assignment in assignment_results
-                if assignment["due_date"] > current_timestamp and assignment["peer_review"]
+                if assignment["due_date"] > current_timestamp
+                and assignment["peer_review"]
             ]
-            team_options = [discord.SelectOption(label=team) for team in team_result["peer_review"]]
-        else:
-            assignment_options = [discord.SelectOption(label=assignment["name"]) for assignment in assignment_results]
             team_options = [
-                discord.SelectOption(label=team["name"]) for team in team_collection.find({"guild_id": interaction.guild_id})
+                discord.SelectOption(label=team) for team in team_result["peer_review"]
+            ]
+        else:
+            assignment_options = [
+                discord.SelectOption(label=assignment["name"])
+                for assignment in assignment_results
+            ]
+            team_options = [
+                discord.SelectOption(label=team["name"])
+                for team in team_collection.find({"guild_id": interaction.guild_id})
             ]
 
         if not assignment_options:
@@ -168,7 +183,9 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         embed, view = await self.grade_view(interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-    @peer_review.command(name="download", description="Download peer reviews for an assignment.")
+    @peer_review.command(
+        name="download", description="Download peer reviews for an assignment."
+    )
     async def download(self, interaction: discord.Interaction) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
@@ -180,7 +197,11 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         collection = database.Database().get_collection("assignments")
         query = {"guild_id": interaction.guild_id}
         assignments = [item for item in collection.find(query).sort("name")]
-        options = [discord.SelectOption(label=assignment["name"]) for assignment in assignments if assignment["peer_review"]]
+        options = [
+            discord.SelectOption(label=assignment["name"])
+            for assignment in assignments
+            if assignment["peer_review"]
+        ]
 
         view = discord.ui.View()
 
@@ -188,7 +209,9 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
             embed.description = "Use the dropdown below to select an assignment you want to download peer reviews from."
             view.add_item(DownloadDropdown(options=options))
         else:
-            embed.description = "No assignments are available at the moment. Please check back later!"
+            embed.description = (
+                "No assignments are available at the moment. Please check back later!"
+            )
 
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -199,15 +222,23 @@ class DistributeConfirmButtons(discord.ui.View):
         self.peer_reviews = peer_reviews
         self.peer_review_string = peer_review_string
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="distribute_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="distribute_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("teams")
         query = {"guild_id": interaction.guild_id}
         results = collection.find(query)
 
         for result in results:
             if result["name"] in self.peer_reviews:
-                peer_review = self.peer_reviews[result["name"]] if result["name"] in self.peer_reviews else None
+                peer_review = (
+                    self.peer_reviews[result["name"]]
+                    if result["name"] in self.peer_reviews
+                    else None
+                )
                 temp_query = {"guild_id": interaction.guild_id, "name": result["name"]}
                 new_value = {"$set": {"peer_review": peer_review}}
                 collection.update_one(temp_query, new_value)
@@ -217,13 +248,18 @@ class DistributeConfirmButtons(discord.ui.View):
             color=discord.Color.green(),
             thumbnail_url="https://i.imgur.com/oPlYcu6.png",
             title="Peer review distributed",
-            description=f"Successfully distributed peer review teams as following:\n\n" f"{self.peer_review_string}",
+            description=f"Successfully distributed peer review teams as following:\n\n"
+            f"{self.peer_review_string}",
             timestamp=True,
         )
         await interaction.response.edit_message(embed=embed, view=None)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="distribute_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="distribute_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),
@@ -251,7 +287,11 @@ class GradeDropdown(discord.ui.Select):
             return
 
         grade_collection = database.Database().get_collection("grades")
-        grade_query = {"guild_id": interaction.guild_id, "name": assignment, "team": team}
+        grade_query = {
+            "guild_id": interaction.guild_id,
+            "name": assignment,
+            "team": team,
+        }
         grade_result = grade_collection.find_one(grade_query)
         current_points = grade_result["points"] if grade_result else 0
 
@@ -268,7 +308,11 @@ class GradeDropdown(discord.ui.Select):
             fields=[
                 {"name": "Assignment:", "value": assignment, "inline": False},
                 {"name": "Team:", "value": team, "inline": False},
-                {"name": "Points Earned:", "value": f"{current_points}/{max_points}", "inline": False},
+                {
+                    "name": "Points Earned:",
+                    "value": f"{current_points}/{max_points}",
+                    "inline": False,
+                },
             ],
             timestamp=True,
         )
@@ -300,7 +344,9 @@ class GradeBackButton(discord.ui.Button):
 
 
 class GradeUpdateButton(discord.ui.Button):
-    def __init__(self, assignment: str, team: str, current_points: int, max_points: int) -> None:
+    def __init__(
+        self, assignment: str, team: str, current_points: int, max_points: int
+    ) -> None:
         super().__init__()
         self.label = "Update Grade"
         self.style = discord.ButtonStyle.blurple
@@ -322,7 +368,9 @@ class GradeUpdateButton(discord.ui.Button):
 
 
 class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
-    def __init__(self, assignment: str, team: str, current_points: int, max_points: int) -> None:
+    def __init__(
+        self, assignment: str, team: str, current_points: int, max_points: int
+    ) -> None:
         super().__init__()
         self.assignment = assignment
         self.team = team
@@ -341,7 +389,11 @@ class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
     async def on_submit(self, interaction: discord.Interaction) -> None:
         new_points = int(self.points.value)
         collection = database.Database().get_collection("grades")
-        query = {"guild_id": interaction.guild_id, "assignment": self.assignment, "team": self.team}
+        query = {
+            "guild_id": interaction.guild_id,
+            "assignment": self.assignment,
+            "team": self.team,
+        }
         result = collection.find_one(query)
         if result:
             new_value = {"$set": {"points": new_points}}
@@ -364,7 +416,11 @@ class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
             fields=[
                 {"name": "Assignment:", "value": self.assignment, "inline": False},
                 {"name": "Team:", "value": self.team, "inline": False},
-                {"name": "Points:", "value": f"**{self.current_points}** -> **{new_points}**", "inline": False},
+                {
+                    "name": "Points:",
+                    "value": f"**{self.current_points}** -> **{new_points}**",
+                    "inline": False,
+                },
             ],
             timestamp=True,
         )
@@ -373,7 +429,9 @@ class GradeUpdateModal(discord.ui.Modal, title="Update Grade"):
         view.add_item(GradeBackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -394,10 +452,15 @@ class DownloadDropdown(discord.ui.Select):
         super().__init__()
         self.options = options
 
-    async def callback(self, interaction: discord.Interaction) -> discord.InteractionMessage:
+    async def callback(
+        self, interaction: discord.Interaction
+    ) -> discord.InteractionMessage:
         await interaction.response.defer()
         await interaction.edit_original_response(
-            embed=embeds.make_embed(color=discord.Color.blurple(), description="*Loading...*"), view=None
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Loading...*"
+            ),
+            view=None,
         )
 
         embed = await helpers.team_check(interaction)
@@ -412,9 +475,13 @@ class DownloadDropdown(discord.ui.Select):
             root = pathlib.Path(__file__).parents[3]
             links = []
             for index, team in enumerate(result["peer_review"]):
-                file_dir = root.joinpath("uploads", str(interaction.guild_id), "submissions", team, self.values[0]).glob(
-                    "**/*"
-                )
+                file_dir = root.joinpath(
+                    "uploads",
+                    str(interaction.guild_id),
+                    "submissions",
+                    team,
+                    self.values[0],
+                ).glob("**/*")
                 for item in file_dir:
                     if not item.is_file():
                         continue
@@ -422,7 +489,11 @@ class DownloadDropdown(discord.ui.Select):
                     file = item.open(mode="rb")
                     mime_type = magic.from_buffer(file.read(2048), mime=True)
                     file.seek(0)
-                    fields = {"time": "1h", "reqtype": "fileupload", "fileToUpload": (item.name, file, mime_type)}
+                    fields = {
+                        "time": "1h",
+                        "reqtype": "fileupload",
+                        "fileToUpload": (item.name, file, mime_type),
+                    }
                     encoder = MultipartEncoder(fields=fields)
                     response = requests.post(
                         url="https://litterbox.catbox.moe/resources/internals/api.php",
@@ -440,7 +511,13 @@ class DownloadDropdown(discord.ui.Select):
             thumbnail_url="https://i.imgur.com/o2yYOnK.png",
             title="Peer reviews",
             description="Use the dropdown below to select an assignment you want to download peer reviews from.",
-            fields=[{"name": f"{self.values[0]}:", "value": f"{hyperlinks if hyperlinks else None}", "inline": False}],
+            fields=[
+                {
+                    "name": f"{self.values[0]}:",
+                    "value": f"{hyperlinks if hyperlinks else None}",
+                    "inline": False,
+                }
+            ],
         )
 
         await interaction.edit_original_response(embed=embed, view=self.view)

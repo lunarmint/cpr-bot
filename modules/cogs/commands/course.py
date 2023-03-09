@@ -14,7 +14,9 @@ class CourseCog(commands.GroupCog, group_name="course"):
         self.bot = bot
 
     @staticmethod
-    async def main_view(interaction: discord.Interaction) -> tuple[discord.Embed, discord.ui.View]:
+    async def main_view(
+        interaction: discord.Interaction,
+    ) -> tuple[discord.Embed, discord.ui.View]:
         collection = database.Database().get_collection("courses")
         query = {"guild_id": interaction.guild_id, "user_id": interaction.user.id}
         result = collection.find_one(query)
@@ -32,14 +34,24 @@ class CourseCog(commands.GroupCog, group_name="course"):
 
         if result:
             embed.description = "Your current course information:"
-            embed.add_field(name="Course Name:", value=result["course_name"], inline=False)
-            embed.add_field(name="Course Abbreviation:", value=result["course_abbreviation"], inline=False)
-            embed.add_field(name="Course Section:", value=result["course_section"], inline=False)
+            embed.add_field(
+                name="Course Name:", value=result["course_name"], inline=False
+            )
+            embed.add_field(
+                name="Course Abbreviation:",
+                value=result["course_abbreviation"],
+                inline=False,
+            )
+            embed.add_field(
+                name="Course Section:", value=result["course_section"], inline=False
+            )
             embed.add_field(name="Semester:", value=result["semester"], inline=False)
             embed.add_field(name="CRN:", value=result["crn"], inline=False)
             create_course_button.disabled = True
         else:
-            command = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="role")
+            command = await helpers.get_command(
+                interaction=interaction, command="settings", subcommand_group="role"
+            )
             embed.description = (
                 "This server is not being associated with any courses yet.\n\n"
                 f"If you are an instructor, assign the instructor permission to a role using {command.mention} first if you haven't done so yet. "
@@ -127,9 +139,21 @@ class RemoveCourseButton(discord.ui.Button):
             title="Warning",
             description="This action is **irreversible**. Please confirm that you want to delete the following course:",
             fields=[
-                {"name": "Course Name:", "value": result["course_name"], "inline": False},
-                {"name": "Course Abbreviation:", "value": result["course_abbreviation"], "inline": False},
-                {"name": "Course Section:", "value": result["course_section"], "inline": False},
+                {
+                    "name": "Course Name:",
+                    "value": result["course_name"],
+                    "inline": False,
+                },
+                {
+                    "name": "Course Abbreviation:",
+                    "value": result["course_abbreviation"],
+                    "inline": False,
+                },
+                {
+                    "name": "Course Section:",
+                    "value": result["course_section"],
+                    "inline": False,
+                },
                 {"name": "Semester:", "value": result["semester"], "inline": False},
                 {"name": "CRN:", "value": result["crn"], "inline": False},
             ],
@@ -202,9 +226,21 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
             title="Course created",
             description="Successfully created a new course with the following information:",
             fields=[
-                {"name": "Course Name:", "value": self.course_name.value, "inline": False},
-                {"name": "Course Abbreviation:", "value": self.course_abbreviation.value, "inline": False},
-                {"name": "Course Section:", "value": self.course_section.value, "inline": False},
+                {
+                    "name": "Course Name:",
+                    "value": self.course_name.value,
+                    "inline": False,
+                },
+                {
+                    "name": "Course Abbreviation:",
+                    "value": self.course_abbreviation.value,
+                    "inline": False,
+                },
+                {
+                    "name": "Course Section:",
+                    "value": self.course_section.value,
+                    "inline": False,
+                },
                 {"name": "Semester:", "value": self.semester.value, "inline": False},
                 {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
@@ -215,7 +251,9 @@ class CreateCourseModal(discord.ui.Modal, title="Create Course"):
         view.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -304,9 +342,21 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
             title="Course updated",
             description="Successfully updated course with the following information:",
             fields=[
-                {"name": "Course Name:", "value": self.course_name.value, "inline": False},
-                {"name": "Course Abbreviation:", "value": self.course_abbreviation.value, "inline": False},
-                {"name": "Course Section:", "value": self.course_section.value, "inline": False},
+                {
+                    "name": "Course Name:",
+                    "value": self.course_name.value,
+                    "inline": False,
+                },
+                {
+                    "name": "Course Abbreviation:",
+                    "value": self.course_abbreviation.value,
+                    "inline": False,
+                },
+                {
+                    "name": "Course Section:",
+                    "value": self.course_section.value,
+                    "inline": False,
+                },
                 {"name": "Semester:", "value": self.semester.value, "inline": False},
                 {"name": "CRN:", "value": self.crn.value, "inline": False},
             ],
@@ -317,7 +367,9 @@ class EditCourseModal(discord.ui.Modal, title="Edit Course"):
         view.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+    async def on_error(
+        self, interaction: discord.Interaction, error: Exception
+    ) -> None:
         log.error(error)
         embed = embeds.make_embed(
             color=discord.Color.red(),
@@ -337,8 +389,12 @@ class ConfirmButtons(discord.ui.View):
     def __init__(self) -> None:
         super().__init__()
 
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green, custom_id="course_confirm")
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Confirm", style=discord.ButtonStyle.green, custom_id="course_confirm"
+    )
+    async def confirm(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         collection = database.Database().get_collection("courses")
         query = {"guild_id": interaction.guild_id, "user_id": interaction.user.id}
         collection.delete_one(query)
@@ -355,8 +411,12 @@ class ConfirmButtons(discord.ui.View):
         view.add_item(BackButton())
         await interaction.response.edit_message(embed=embed, view=view)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, custom_id="course_cancel")
-    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+    @discord.ui.button(
+        label="Cancel", style=discord.ButtonStyle.red, custom_id="course_cancel"
+    )
+    async def cancel(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         embed = embeds.make_embed(
             interaction=interaction,
             color=discord.Color.blurple(),

@@ -23,12 +23,16 @@ async def instructor_check(interaction: discord.Interaction) -> discord.Embed | 
     )
 
     if result is None:
-        role_command = await get_command(interaction=interaction, command="settings", subcommand_group="role")
+        role_command = await get_command(
+            interaction=interaction, command="settings", subcommand_group="role"
+        )
         embed.description = f"Use {role_command.mention} first to assign a role with the instructor permission."
         return embed
 
     if not any(role.id == result["role_id"] for role in interaction.user.roles):
-        embed.description = f"Role <@&{result['role_id']}> is required to use this command."
+        embed.description = (
+            f"Role <@&{result['role_id']}> is required to use this command."
+        )
         return embed
 
 
@@ -47,7 +51,9 @@ async def course_check(interaction: discord.Interaction) -> discord.Embed | None
         )
 
 
-async def role_availability_check(interaction: discord.Interaction) -> discord.Embed | None:
+async def role_availability_check(
+    interaction: discord.Interaction,
+) -> discord.Embed | None:
     collection = database.Database().get_collection("settings")
     query = {"guild_id": interaction.guild_id}
     result = collection.find_one(query)
@@ -100,8 +106,12 @@ async def team_check(interaction: discord.Interaction) -> discord.Embed | None:
     result = collection.find_one(query)
 
     if result is None:
-        create_team = await get_command(interaction=interaction, command="team", subcommand_group="create")
-        join_team = await get_command(interaction=interaction, command="team", subcommand_group="join")
+        create_team = await get_command(
+            interaction=interaction, command="team", subcommand_group="create"
+        )
+        join_team = await get_command(
+            interaction=interaction, command="team", subcommand_group="join"
+        )
         return embeds.make_embed(
             interaction=interaction,
             color=discord.Color.red(),
@@ -112,11 +122,15 @@ async def team_check(interaction: discord.Interaction) -> discord.Embed | None:
         )
 
 
-async def cooldown_check(interaction: discord.Interaction, command: str) -> discord.Embed | None:
+async def cooldown_check(
+    interaction: discord.Interaction, command: str
+) -> discord.Embed | None:
     settings_collection = database.Database().get_collection("settings")
     settings_query = {"guild_id": interaction.guild_id}
     settings_result = settings_collection.find_one(settings_query)
-    if settings_result and any(settings_result["role_id"] == role.id for role in interaction.user.roles):
+    if settings_result and any(
+        settings_result["role_id"] == role.id for role in interaction.user.roles
+    ):
         return
 
     task_collection = database.Database().get_collection("tasks")
@@ -129,7 +143,9 @@ async def cooldown_check(interaction: discord.Interaction, command: str) -> disc
     if task_result and task_result["remaining"] == 0:
         present = arrow.utcnow()
         future = present.shift(seconds=task_result["ready_on"] - present.timestamp())
-        duration_string = future.humanize(present, only_distance=True, granularity=["hour", "minute", "second"])
+        duration_string = future.humanize(
+            present, only_distance=True, granularity=["hour", "minute", "second"]
+        )
         return embeds.make_embed(
             interaction=interaction,
             color=discord.Color.red(),
@@ -156,7 +172,9 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
     setting_collection = database.Database().get_collection("settings")
     setting_query = {"guild_id": interaction.guild_id}
     setting_result = setting_collection.find_one(setting_query)
-    if setting_result and any(setting_result["role_id"] == role.id for role in interaction.user.roles):
+    if setting_result and any(
+        setting_result["role_id"] == role.id for role in interaction.user.roles
+    ):
         return
 
     cooldown_collection = database.Database().get_collection("cooldown")
@@ -173,7 +191,9 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
     }
     tasks_result = task_collection.find_one(task_query)
     if tasks_result:
-        remaining = tasks_result["remaining"] - 1 if tasks_result["remaining"] > 1 else 0
+        remaining = (
+            tasks_result["remaining"] - 1 if tasks_result["remaining"] > 1 else 0
+        )
         new_value = {"$set": {"remaining": remaining}}
         task_collection.update_one(task_query, new_value)
 
@@ -189,7 +209,10 @@ async def set_cooldown(interaction: discord.Interaction, command: str) -> None:
 
 
 async def get_command(
-    interaction: discord.Interaction, command: str, subcommand_group: str = None, subcommand: str = None
+    interaction: discord.Interaction,
+    command: str,
+    subcommand_group: str = None,
+    subcommand: str = None,
 ) -> AppCommand | AppCommandGroup:
     app_commands = await interaction.client.tree.fetch_commands()
     for index, value in enumerate(app_commands):
@@ -197,9 +220,17 @@ async def get_command(
             return value
 
         for option in value.options:
-            if value.name == command and option.name == subcommand_group and subcommand is None:
+            if (
+                value.name == command
+                and option.name == subcommand_group
+                and subcommand is None
+            ):
                 return option
 
             for item in option.options:
-                if value.name == command and option.name == subcommand_group and item.name == subcommand:
+                if (
+                    value.name == command
+                    and option.name == subcommand_group
+                    and item.name == subcommand
+                ):
                     return item

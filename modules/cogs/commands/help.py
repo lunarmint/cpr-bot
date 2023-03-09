@@ -13,32 +13,93 @@ class HelpCog(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="help", description="Information for how to use the bot for instructors.")
+    @app_commands.command(
+        name="help", description="Information for how to use the bot for instructors."
+    )
     async def help(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        assignment_view = await helpers.get_command(interaction=interaction, command="assignment", subcommand_group="view")
-        assignment_upload = await helpers.get_command(interaction=interaction, command="assignment", subcommand_group="upload")
-        course_view = await helpers.get_command(interaction=interaction, command="course", subcommand_group="view")
-        help_command = await helpers.get_command(interaction=interaction, command="help")
-        peer_review_distribute = await helpers.get_command(interaction=interaction, command="peer", subcommand_group="review", subcommand="distribute")
-        peer_review_grade = await helpers.get_command(interaction=interaction, command="peer", subcommand_group="review", subcommand="grade")
-        peer_review_download = await helpers.get_command(interaction=interaction, command="peer", subcommand_group="review", subcommand="download")
-        settings_team_size = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="team", subcommand="size")
-        settings_peer_review = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="peer", subcommand="review")
-        settings_role = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="role")
-        settings_cooldown = await helpers.get_command(interaction=interaction, command="settings", subcommand_group="cooldown")
-        submission_view = await helpers.get_command(interaction=interaction, command="submission", subcommand_group="view")
-        submission_upload = await helpers.get_command(interaction=interaction, command="submission", subcommand_group="upload")
-        team_create = await helpers.get_command(interaction=interaction, command="team", subcommand_group="create")
-        team_join = await helpers.get_command(interaction=interaction, command="team", subcommand_group="join")
-        team_leave = await helpers.get_command(interaction=interaction, command="team", subcommand_group="leave")
-        team_view = await helpers.get_command(interaction=interaction, command="team", subcommand_group="view")
-        team_rename = await helpers.get_command(interaction=interaction, command="team", subcommand_group="rename")
-        team_edit = await helpers.get_command(interaction=interaction, command="team", subcommand_group="edit")
-        team_remove = await helpers.get_command(interaction=interaction, command="team", subcommand_group="remove")
-        team_lock = await helpers.get_command(interaction=interaction, command="team", subcommand_group="lock")
-        team_unlock = await helpers.get_command(interaction=interaction, command="team", subcommand_group="unlock")
+        assignment_view = await helpers.get_command(
+            interaction=interaction, command="assignment", subcommand_group="view"
+        )
+        assignment_upload = await helpers.get_command(
+            interaction=interaction, command="assignment", subcommand_group="upload"
+        )
+        course_view = await helpers.get_command(
+            interaction=interaction, command="course", subcommand_group="view"
+        )
+        help_command = await helpers.get_command(
+            interaction=interaction, command="help"
+        )
+        peer_review_distribute = await helpers.get_command(
+            interaction=interaction,
+            command="peer",
+            subcommand_group="review",
+            subcommand="distribute",
+        )
+        peer_review_grade = await helpers.get_command(
+            interaction=interaction,
+            command="peer",
+            subcommand_group="review",
+            subcommand="grade",
+        )
+        peer_review_download = await helpers.get_command(
+            interaction=interaction,
+            command="peer",
+            subcommand_group="review",
+            subcommand="download",
+        )
+        settings_team_size = await helpers.get_command(
+            interaction=interaction,
+            command="settings",
+            subcommand_group="team",
+            subcommand="size",
+        )
+        settings_peer_review = await helpers.get_command(
+            interaction=interaction,
+            command="settings",
+            subcommand_group="peer",
+            subcommand="review",
+        )
+        settings_role = await helpers.get_command(
+            interaction=interaction, command="settings", subcommand_group="role"
+        )
+        settings_cooldown = await helpers.get_command(
+            interaction=interaction, command="settings", subcommand_group="cooldown"
+        )
+        submission_view = await helpers.get_command(
+            interaction=interaction, command="submission", subcommand_group="view"
+        )
+        submission_upload = await helpers.get_command(
+            interaction=interaction, command="submission", subcommand_group="upload"
+        )
+        team_create = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="create"
+        )
+        team_join = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="join"
+        )
+        team_leave = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="leave"
+        )
+        team_view = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="view"
+        )
+        team_rename = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="rename"
+        )
+        team_edit = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="edit"
+        )
+        team_remove = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="remove"
+        )
+        team_lock = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="lock"
+        )
+        team_unlock = await helpers.get_command(
+            interaction=interaction, command="team", subcommand_group="unlock"
+        )
 
         description = (
             "**__BASIC SETUP:__**\n\n"
