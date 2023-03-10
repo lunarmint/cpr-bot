@@ -1,5 +1,5 @@
 # For more information, refer to https://aka.ms/vscode-docker-python
-FROM python:3.11.1
+FROM python:3.11.2
 LABEL maintainer="https://github.com/lunarmint/cpr-bot"
 
 # Keeps Python from generating .pyc files in the container
