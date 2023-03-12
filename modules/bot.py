@@ -11,7 +11,7 @@ from modules.utils.config import config
 
 bot = commands.Bot(
     activity=discord.Activity(
-        type=discord.ActivityType.listening, name=config["bot"]["status"].get()
+        type=discord.ActivityType.listening, name=config["bot"]["status"].as_str_expanded()
     ),
     command_prefix=config["bot"]["prefix"].as_str_expanded(),
     help_command=None,
