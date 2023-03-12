@@ -158,7 +158,7 @@ class AssignmentDropdown(discord.ui.Select):
         self.view.children[4] is the peer review disabled/enabled button.
         self.values[0] is the currently selected assignment name.
         """
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
             embed=embeds.make_embed(
                 color=discord.Color.blurple(), description="*Loading...*"

@@ -16,8 +16,14 @@ class HelpCog(commands.Cog):
     @app_commands.command(
         name="help", description="Information for how to use the bot for instructors."
     )
-    async def help(self, interaction: discord.Interaction):
+    async def help(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
+        await interaction.edit_original_response(
+            embed=embeds.make_embed(
+                color=discord.Color.blurple(), description="*Loading...*"
+            ),
+            view=None,
+        )
 
         assignment_view = await helpers.get_command(
             interaction=interaction, command="assignment", subcommand_group="view"
