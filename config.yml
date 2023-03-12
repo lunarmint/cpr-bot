@@ -3,6 +3,8 @@ bot:
   prefix: ${BOT_PREFIX}
   status: ${BOT_STATUS}
   log_level: ${LOG_LEVEL}
+openai:
+  api_key: ${OPENAI_API_KEY}
 database:
   username: ${MONGO_USERNAME}
   password: ${MONGO_PASSWORD}
