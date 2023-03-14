@@ -17,6 +17,7 @@ class CourseCog(commands.GroupCog, group_name="course"):
     async def main_view(
         interaction: discord.Interaction,
     ) -> tuple[discord.Embed, discord.ui.View]:
+        """Main view of the course interface, to be reused by other methods when the "back" button is hit."""
         collection = database.Database().get_collection("courses")
         query = {"guild_id": interaction.guild_id, "user_id": interaction.user.id}
         result = collection.find_one(query)

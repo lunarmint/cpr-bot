@@ -69,7 +69,9 @@ class PeerReviewCog(commands.GroupCog, group_name="peer"):
         random.shuffle(teams)
         peer_reviews = {}
         for index, value in enumerate(teams):
+            # Review the teams that are after the current team in the list.
             reviews_index = list(range(index + 1, index + peer_review_size + 1))
+            # If the index is larger than the length of the list, wrap around to the start of the list.
             peer_reviews[value] = [teams[i % len(teams)] for i in reviews_index]
 
         peer_reviews_list = [

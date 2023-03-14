@@ -17,6 +17,7 @@ class ChatGPTCog(commands.Cog):
 
     @app_commands.command(name="gpt", description="Generate text using GPT-3.")
     async def gpt(self, interaction: discord.Interaction, prompt: str) -> None:
+        """/gpt command to connect to OpenAI's GPT-3 API and chat."""
         await interaction.response.defer(ephemeral=True)
 
         embed = embeds.make_embed(

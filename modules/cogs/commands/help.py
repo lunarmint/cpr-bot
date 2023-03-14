@@ -17,6 +17,7 @@ class HelpCog(commands.Cog):
         name="help", description="Information for how to use the bot for instructors."
     )
     async def help(self, interaction: discord.Interaction) -> None:
+        """/help command to list all available commands with a brief usage description."""
         await interaction.response.defer(ephemeral=True)
         await interaction.edit_original_response(
             embed=embeds.make_embed(
