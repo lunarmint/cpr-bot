@@ -492,7 +492,7 @@ class CreateTeamConfirmButtons(discord.ui.View):
             name=self.name, category=category
         )
         voice_channel = await interaction.guild.create_voice_channel(
-            name=self.name, category=category, bitrate=96000, overwrites=permission
+            name=self.name, category=category, bitrate=96000
         )
 
         team_document = {
