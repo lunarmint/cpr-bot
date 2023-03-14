@@ -23,9 +23,7 @@ However, if you wish to run your own instance of the bot, please continue readin
 - application.commands
 
 2. Bot Permissions:
-- Manage Channels
-- Read Message/View Channels
-- Send Messages
+- Administrator (required to manage channel permissions)
 
 **Step 6:** Copy the content in the `Generated URL` right below. Copy it to your browser's address bar and add the bot to your server.
 
