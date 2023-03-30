@@ -19,7 +19,7 @@ class ChatGPTCog(commands.Cog):
 
     @gpt.command(name="chat", description="Generate text using GPT-3.")
     async def chat(self, interaction: discord.Interaction, prompt: str) -> None:
-        """/gpt chat command to connect to OpenAI's GPT-3 API and chat."""
+        """/gpt chat command to chat using OpenAI's GPT-3."""
         await interaction.response.defer(ephemeral=True)
 
         embed = embeds.make_embed(
@@ -54,7 +54,7 @@ class ChatGPTCog(commands.Cog):
 
     @gpt.command(name="image", description="Generate image using GPT-3.")
     async def image(self, interaction: discord.Interaction, prompt: str) -> None:
-        """/gpt image command to connect to OpenAI's GPT-3 API and generate images."""
+        """/gpt image command to generate image using OpenAI's GPT-3."""
         await interaction.response.defer(ephemeral=True)
 
         embed = embeds.make_embed(
