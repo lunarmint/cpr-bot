@@ -15,16 +15,16 @@ class ChatGPTCog(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="gpt", description="Generate text using GPT-3.")
-    async def gpt(self, interaction: discord.Interaction, prompt: str) -> None:
-        """/gpt command to connect to OpenAI's GPT-3 API and chat."""
+    gpt = app_commands.Group(name="gpt", description="GPT-3 commands.")
+
+    @gpt.command(name="chat", description="Generate text using GPT-3.")
+    async def chat(self, interaction: discord.Interaction, prompt: str) -> None:
+        """/gpt chat command to connect to OpenAI's GPT-3 API and chat."""
         await interaction.response.defer(ephemeral=True)
 
         embed = embeds.make_embed(
-                color=discord.Color.blurple(),
-                title=prompt,
-                description="*Loading...*"
-            )
+            color=discord.Color.blurple(), title=prompt, description="*Loading...*"
+        )
 
         await interaction.edit_original_response(embed=embed)
 
@@ -34,6 +34,39 @@ class ChatGPTCog(commands.Cog):
         )
         reply_content = completion.choices[0].message.content
         embed.description = reply_content
+
+        await interaction.edit_original_response(embed=embed)
+
+    @gpt.command(name="image", description="Generate image using GPT-3.")
+    async def image(self, interaction: discord.Interaction, prompt: str) -> None:
+        """/gpt image command to connect to OpenAI's GPT-3 API and generate images."""
+        await interaction.response.defer(ephemeral=True)
+
+        embed = embeds.make_embed(
+            color=discord.Color.blurple(), title=prompt, description="*Loading...*"
+        )
+
+        await interaction.edit_original_response(embed=embed)
+
+        openai.api_key = config["openai"]["api_key"].as_str_expanded()
+        try:
+            response = openai.Image.create(
+                prompt=f"{prompt}", n=1, size="1024x1024", response_format="url"
+            )
+            image_url = response["data"][0]["url"]
+            embed.set_image(url=image_url)
+            embed.description = None
+        except (
+                openai.error.APIError,
+                openai.error.Timeout,
+                openai.error.RateLimitError,
+                openai.error.APIError,
+                openai.error.APIConnectionError,
+                openai.error.InvalidRequestError,
+                openai.error.AuthenticationError,
+                openai.error.ServiceUnavailableError,
+        ) as e:
+            embed.description = e
 
         await interaction.edit_original_response(embed=embed)
 
